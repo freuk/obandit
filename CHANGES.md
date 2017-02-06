@@ -1,4 +1,5 @@
-vX.Y.Z YYYY-MM-DD Location
+
+v0.1.0 2017-02-06 Grenoble
 --------------------------
 
-First release. 
+* First release with EXP3, UCB1, Epsilon Greedy.

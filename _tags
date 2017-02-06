@@ -1,4 +1,6 @@
 true : bin_annot, safe_string, package(bytes)
 
+true : package(batteries)
+
 <src> : include
 <test> : include
