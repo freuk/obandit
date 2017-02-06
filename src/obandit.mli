@@ -38,7 +38,7 @@ module type Bandit = sig
   (**A Mutable bandit.*)
   val getAction : float -> int
 (**Give the positive reward for the last action and choose the next action, encoded as
-  an integer in the {0..n-1} range for n actions.
+  an integer in the [0,n-1] range for n actions.
   Rewards should be between 0 and 1. For rewards larger than 1, use the WrapDoubling functor.
   The first reward is discarded.*)
 end
