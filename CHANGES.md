@@ -1,4 +1,4 @@
-v0.1.2 2017-02-06 Grenoble
+v0.1.3 2017-02-06 Grenoble
 --------------------------
 
 * Added deployment tools.
