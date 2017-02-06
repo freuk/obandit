@@ -1,6 +1,11 @@
 v0.1.2 2017-02-06 Grenoble
 --------------------------
 
+* Added deployment tools.
+
+v0.1.2 2017-02-06 Grenoble
+--------------------------
+
 * Documentation bugfix two.
 
 v0.1.1 2017-02-06 Grenoble
