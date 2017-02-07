@@ -7,7 +7,7 @@ EXP3, UCB1 and Epsilon-greedy algorithms.
 
 Obandit is distributed under the ISC license.
 
-Homepage: git.freux.fr/obandit  
+Homepage: http://git.freux.fr/obandit  
 
 ## Installation
 
@@ -24,7 +24,7 @@ The documentation and API reference is generated from the source
 interfaces. It can be consulted [online][doc] or via `odig doc
 obandit`.
 
-[doc]: freux.fr/obandit/doc
+[doc]: http://freux.fr/obandit/doc
 
 ## Sample programs
 
