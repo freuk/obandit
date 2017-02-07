@@ -1,3 +1,8 @@
+v0.1.32 2017-02-06 Grenoble
+--------------------------
+
+* changes to contact information.
+
 v0.1.31 2017-02-06 Grenoble
 --------------------------
 
