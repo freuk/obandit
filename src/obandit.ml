@@ -42,7 +42,7 @@ module MakeExp3 (P :BanditParam) : Bandit = struct
     if !a < 0 then
       let x = Random.int P.n in (a:=x; x)
       else
-        let () = 
+        let () =
           let oldSum = Array.fold_left (fun acc x -> x +. acc) 0.0 w
           in w.(!a) <- w.(!a) *. (exp (P.explo *. x /. ((float_of_int !k) *. (wToP oldSum w.(!a)))));
         in let p =
@@ -122,9 +122,17 @@ module MakeEpsilonGreedy (P : BanditParam) : Bandit = struct
         newA)
 end
 
-module WrapDoubling (B : Bandit) : Bandit = struct
+module WrapDoubling (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit = struct
+
+  let makeM () = (module B(P) : Bandit)
+  let m = ref (makeM ())
+
   let s = ref 1.
   let getAction x =
-    if x > !s then s := !s *. 2.0;
-    B.getAction (x /. !s)
+    let x = abs_float x
+    in begin
+      if x > !s then (s := !s *. 2.0; m := makeM ());
+      let module M = (val (!m))
+      in M.getAction (x /. !s)
+    end
 end

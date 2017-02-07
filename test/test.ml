@@ -41,13 +41,13 @@ let doTest depth bm str=
     end
     done;
     Printf.printf "%s: %f " str (!rsum /. (float_of_int !n));
-    if (!rsum /. (float_of_int !n) > 0.4) then
+    if (!rsum /. (float_of_int !n) > 0.37) then
       Printf.printf "converges.%s" ""
     else
       failwith "insufficient performance of the algorithm."
   end
 
-let () = 
+let () =
   let module PUCB = struct
     let n = 2
     let explo = 0.7
@@ -61,8 +61,8 @@ let () =
     let explo = 0.99
   end
 
-  in let exp3 = (module WrapDoubling(MakeExp3(PEXP3)):Bandit)
-  in let ucb1 = (module WrapDoubling(MakeUCB1(PUCB)):Bandit)
-  in let epsg = (module WrapDoubling(MakeEpsilonGreedy(PEPSG)):Bandit)
+  in let exp3 = (module WrapDoubling(PEXP3)(MakeExp3):Bandit)
+  in let ucb1 = (module WrapDoubling(PEXP3)(MakeUCB1):Bandit)
+  in let epsg = (module WrapDoubling(PEXP3)(MakeEpsilonGreedy):Bandit)
   in let dtn n = doTest n exp3 "Exp3"; doTest n ucb1 "UCB1"; doTest n epsg "EPSG"; Printf.printf "%s" "\n"
   in List.iter dtn [3000;30000]
