@@ -1,6 +1,11 @@
 v0.1.36 2017-02-06 Grenoble
 --------------------------
 
+* distrib folder change.
+
+v0.1.36 2017-02-06 Grenoble
+--------------------------
+
 * distrib url fix.
 
 v0.1.35 2017-02-06 Grenoble
