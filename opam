@@ -2,10 +2,9 @@ opam-version: "1.2"
 maintainer: "Valentin Reis <fre@freux.fr>"
 authors: ["Valentin Reis <fre@freux.fr>"]
 homepage: "git.freux.fr/obandit"
-doc: "freux.fr/obandit/doc"
+doc: "http://freux.fr/obandit/doc"
 license: "ISC"
-dev-repo: "git.freux.fr/obandit.git"
-bug-reports: "git.freux.fr/obandit/issues"
+dev-repo: "http://git.freux.fr/obandit.git"
 tags: []
 available: [ ocaml-version >= "4.01.0"]
 depends: [

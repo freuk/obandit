@@ -4,6 +4,8 @@
 open Topkg
 
 let () =
-  Pkg.describe "obandit" @@ fun c ->
+  Pkg.describe 
+    ~distrib:(Pkg.distrib ~uri:"freux.fr/obandit/distrib/" ()) "obandit" 
+  @@ fun c ->
   Ok [ Pkg.mllib "src/obandit.mllib";
        Pkg.test "test/test"; ]
