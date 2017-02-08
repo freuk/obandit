@@ -1,3 +1,8 @@
+v0.1.4 2017-02-08 Grenoble
+--------------------------
+
+* Implement the doubling trick with restarting.
+
 v0.1.38 2017-02-07 Grenoble
 --------------------------
 
