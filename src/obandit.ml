@@ -24,7 +24,7 @@ open BatEnum
 
 module type BanditParam = sig
   val n : int
-  val explo : float
+  val rate : int -> float
 end
 
 module type Bandit = sig
@@ -36,7 +36,7 @@ module MakeExp3 (P :BanditParam) : Bandit = struct
   let w = Array.make P.n 1.
   let k = ref 1
 
-  let wToP sum w = ((1.0 -. P.explo) *. (w /. sum)) +. (P.explo /. (float_of_int !k))
+  let wToP sum w = ((1.0 -. (P.rate !k)) *. (w /. sum)) +. ((P.rate !k) /. (float_of_int !k))
 
   let getAction x =
     if !a < 0 then
@@ -44,10 +44,10 @@ module MakeExp3 (P :BanditParam) : Bandit = struct
       else
         let () =
           let oldSum = Array.fold_left (fun acc x -> x +. acc) 0.0 w
-          in w.(!a) <- w.(!a) *. (exp (P.explo *. x /. ((float_of_int !k) *. (wToP oldSum w.(!a)))));
+          in w.(!a) <- w.(!a) *. (exp ((P.rate !k) *. x /. ((float_of_int !k) *. (wToP oldSum w.(!a)))));
         in let p =
           let sum =  Array.fold_left (fun acc x -> x +. acc) 0.0 w
-          in Array.map (fun w -> ((1.0 -. P.explo) *. (w /. sum)) +. (P.explo /. (float_of_int !k))) w
+          in Array.map (fun w -> ((1.0 -. (P.rate !k)) *. (w /. sum)) +. ((P.rate !k) /. (float_of_int !k))) w
         in let r =
           let sump = Array.fold_left (fun acc x -> x +. acc) 0.0 p
           in Random.float sump
@@ -72,7 +72,7 @@ module MakeUCB1 (P : BanditParam) : Bandit = struct
   let nVisits = Array.make P.n 0
   let k = ref 0
 
-  let f i = (u.(i) /. float_of_int (nVisits.(i))) +. (P.explo *. log (float_of_int (!k+1)) /. (float_of_int nVisits.(i)))
+  let f i = (u.(i) /. float_of_int (nVisits.(i))) +. ((P.rate !k) *. log (float_of_int (!k+1)) /. (float_of_int nVisits.(i)))
 
   let getAction x =
     let newA = if !k < P.n
@@ -111,7 +111,7 @@ module MakeEpsilonGreedy (P : BanditParam) : Bandit = struct
     else
       begin
         u.(!a) <- u.(!a) +. x;
-        if Random.float 1. < P.explo then
+        if Random.float 1. < (P.rate !k) then
           snd (BatList.min_max ~cmp:(makecmp f) (BatList.of_enum (0 -- (P.n-1))))
         else
           Random.int P.n
@@ -122,17 +122,19 @@ module MakeEpsilonGreedy (P : BanditParam) : Bandit = struct
         newA)
 end
 
-module WrapDoubling (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit = struct
-
+module WrapRange (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit = struct
   let makeM () = (module B(P) : Bandit)
   let m = ref (makeM ())
 
-  let s = ref 1.
+  let u = ref 1.
+  let l = ref 0.
+
   let getAction x =
     let x = abs_float x
     in begin
-      if x > !s then (s := !s *. 2.0; m := makeM ());
+      if x > !u then (u := !l +. ((!u -. !l) *. 2.0); m := makeM ());
+      if x < !l then (l := !u -. ((!u -. !l )*. 2.0); m := makeM ());
       let module M = (val (!m))
-      in M.getAction (x /. !s)
+      in M.getAction ((x -. !l) /. (!u -. !l))
     end
 end

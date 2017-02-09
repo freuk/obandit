@@ -27,34 +27,37 @@
   ---------------------------------------------------------------------------*)
 
 module type BanditParam = sig
-  (**This module parameter gives the exploration rate and number of actions of the bandit.*)
+  (**The BanditParam module parameter gives the exploration rate and number of actions of the bandit.*)
   val n : int
   (**Number of actions*)
-  val explo : float
-  (**Exploration rate.*)
+  val rate : int -> float
+  (**Exploration/learning rate, fixed or decaying. takes the round number as argument
+   and returns the value of the learning rate*)
 end
 
 module type Bandit = sig
   (**A Mutable bandit.*)
   val getAction : float -> int
-  (**Give the positive reward for the last action and choose the next action, encoded as
-  an integer in the [0,n-1] range for n actions.
-  Rewards should be between 0 and 1. For rewards larger than 1, use the WrapDoubling functor.
-  The first reward is discarded.*)
+  (**The getAction function mutates the bandit one step further in the bandit game. 
+  The argument is the reward for the last action and the result is the next action.
+  Rewards are floats in [0,1] and actions are integers in [0,n-1].
+  The first reward is discarded. In order to use rewards larger than 1, please use
+  the WrapDoubling functor.*)
 end
 
 module MakeExp3 (P : BanditParam) : Bandit
-(**Exp3 Bandit.*)
+(**The Exp3 Bandit for adversarial regret minimization.*)
 
 module MakeUCB1 (P : BanditParam) : Bandit
-(**UCB1 Bandit.*)
+(**The UCB1 Bandit for stochastic regret minimization .*)
 
 module MakeEpsilonGreedy (P : BanditParam) : Bandit
-(**Epsilon-Greedy Bandit with a fixed exploration rate.*)
+(**The Epsilon-Greedy Bandit with a fixed exploration rate.*)
 
-module WrapDoubling (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit
-  (**This functor wraps a bandit algorithm with the
-  doubling trick. This means that all rewards are rescaled according to a scale
-  (initially, 1). When a value is observed above the scale, the bandit
-  algorithm is restarted and the scale is doubled.  This is useful when reward
-  scale is unknown and larger than 1.*)
+module WrapRange (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit
+  (**The WrapRange functor wraps a bandit algorithm with the doubling trick.
+  This heuristic allows to use a andit algorithm without knowing the reward
+  ranges. All rewards are linearly rescaled to a range (initially [0,1]).
+  When a value is observed above the range, the bandit algorithm is restarted 
+  and the interval is doubled in that direction.
+  *)
