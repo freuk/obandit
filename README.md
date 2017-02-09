@@ -1,13 +1,12 @@
 Obandit — Ocaml Multi-Armed Bandits
 -------------------------------------------------------------------------------
-%%VERSION%%
 
 Obandit is an OCaml module for basic multi-armed bandits. It supports the
 EXP3, UCB1 and Epsilon-greedy algorithms.
 
 Obandit is distributed under the ISC license.
 
-Homepage: http://git.freux.fr/obandit  
+Homepage: http://freux.fr/obandit  
 
 ## Installation
 
