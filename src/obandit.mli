@@ -54,10 +54,22 @@ module MakeUCB1 (P : BanditParam) : Bandit
 module MakeEpsilonGreedy (P : BanditParam) : Bandit
 (**The Epsilon-Greedy Bandit with a fixed exploration rate.*)
 
-module WrapRange (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit
+module type RangeParam = sig
+  val upper : float
+  (**The upper value of the range*)
+  val lower : float
+  (**The lower value of the range*)
+end
+
+module WrapRange (R:RangeParam) (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit
   (**The WrapRange functor wraps a bandit algorithm with the doubling trick.
   This heuristic allows to use a andit algorithm without knowing the reward
-  ranges. All rewards are linearly rescaled to a range (initially [0,1]).
+  ranges. All rewards are linearly rescaled to a range (initially given by a RangeParam).
   When a value is observed above the range, the bandit algorithm is restarted 
-  and the interval is doubled in that direction.
+  and the range interval is doubled in that direction.
+  *)
+
+module WrapRange01 (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit
+  (**The WrapRange01 functor is a convenience aliasing of WrapRange with an
+   initial "standard" range of [0,1].
   *)

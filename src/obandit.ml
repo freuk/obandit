@@ -122,19 +122,23 @@ module MakeEpsilonGreedy (P : BanditParam) : Bandit = struct
         newA)
 end
 
-module WrapRange (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit = struct
+module type RangeParam = sig
+  val upper : float
+  val lower : float
+end
+
+module WrapRange (R:RangeParam) (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit = struct
   let makeM () = (module B(P) : Bandit)
   let m = ref (makeM ())
 
-  let u = ref 1.
-  let l = ref 0.
+  let u = ref R.upper
+  let l = ref R.lower
 
   let getAction x =
-    let x = abs_float x
-    in begin
       if x > !u then (u := !l +. ((!u -. !l) *. 2.0); m := makeM ());
       if x < !l then (l := !u -. ((!u -. !l )*. 2.0); m := makeM ());
       let module M = (val (!m))
       in M.getAction ((x -. !l) /. (!u -. !l))
-    end
 end
+
+module WrapRange01 = WrapRange(struct let upper=1. let lower=0. end)
