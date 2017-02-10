@@ -22,13 +22,15 @@
 
 open BatEnum
 
+type action = int Ok | int RangeExtended
+
 module type BanditParam = sig
   val n : int
   val rate : int -> float
 end
 
 module type Bandit = sig
-  val getAction : float -> int
+  val getAction : float -> action
 end
 
 module MakeExp3 (P :BanditParam) : Bandit = struct
