@@ -1,3 +1,8 @@
+v0.1.41 2017-02-10 Grenoble
+--------------------------
+
+* Change the doubling trick to a Range, add documentation.
+
 v0.1.41 2017-02-08 Grenoble
 --------------------------
 
