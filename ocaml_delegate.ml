@@ -9,10 +9,10 @@ let unsupported = Ok 1
 
 let publish = function
   | "distrib" :: uri :: name :: version :: msg :: archive :: _ ->
-      let scp = Cmd.(v "scp" % archive % (Printf.sprintf "web:/mnt/web/web/%s/releases" name))
+      let scp = Cmd.(v  "scp" % archive % (Printf.sprintf "web:/mnt/web/web/%s/releases" name))
       in let _ = OS.Cmd.(run scp) in Ok 0
   | "doc" :: uri :: name :: version :: msg :: docdir :: _ ->
-      let scp = Cmd.(v "scp" % "-r" % (Printf.sprintf "%s/*" docdir) % (Printf.sprintf "web:/mnt/web/web/%s/doc" name))
+      let scp = Cmd.(v "rsync" % "-r" % (Printf.sprintf "%s/" docdir) % (Printf.sprintf "web:/mnt/web/web/%s/doc" name))
       in let _ = OS.Cmd.(run scp) in Ok 0
   | "alt" :: kind :: uri :: name :: version :: msg :: archive :: _ ->
       unsupported
