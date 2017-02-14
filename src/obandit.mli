@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2017 Valentin Reis. All rights reserved.
+ Copyright (c) 2017 Valentin Reis. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
@@ -35,7 +35,7 @@ module type BanditParam = sig
   val rate : int -> float
 end
 
-(** A Mutable bandit.*)
+(** A Mutable {m{% x_1, x_2 \dots, x_{N-1}%}} bandit.*)
 module type Bandit = sig
   (** The getAction function mutates the bandit one step further in the bandit game. 
      The argument is the reward for the last action and the result is the next action.
