@@ -35,6 +35,17 @@ module type BanditParam = sig
   val rate : int -> float
 end
 
+(** The AlphaPhiBanditParam module parameter gives the exploration rate and number of actions of the bandit.*)
+module type AlphaPhiBanditParam = sig
+  (** Number of actions*)
+  val n : int
+  (** The Alpha Parameter*)
+  val alpha : float
+  (** The inverse of the Legendre-Fenchel transform of the convex function Phi of the bound in eq 2.2.
+  * of *)
+  val phiInverseLegendreFenchel : float -> float
+end
+
 (** A Mutable bandit.*)
 module type Bandit = sig
   (** The getAction function mutates the bandit one step further in the bandit game. 
@@ -48,8 +59,10 @@ end
 (** The Exp3 Bandit for adversarial regret minimization.*)
 module MakeExp3 (P : BanditParam) : Bandit
 
-(** The UCB1 Bandit for stochastic regret minimization .*)
-module MakeUCB1 (P : BanditParam) : Bandit
+(** The Alpha-Phi-UCB Bandit for stochastic regret minimization, as described
+* in Bubeck and Cesa-Bianchi's survey "Regret Analysis of Stochastic and Nonstochastic
+* Multi-armed Bandit Problems. *)
+module MakeAlphaPhiUCB (P : AlphaPhiBanditParam) : Bandit
 
 (** The Epsilon-Greedy Bandit with a fixed exploration rate.*)
 module MakeEpsilonGreedy (P : BanditParam) : Bandit
