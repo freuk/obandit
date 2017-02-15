@@ -63,7 +63,7 @@ end
   {eq{%
   \text{argmax}_{i=1,\cdots,K} \left\[ \widehat{\mu_i} + (\psi^{*})^{-1} \left( \frac{\alpha \ln t}{T_i} \right) \right\]
   %}}
-  where {m{% \alpha > 0 %}} is a hyperparameter, {m{% \mu_i %}} is the estimate maintained for arm i, 
+  where {m{% \alpha > 0 %}} is a hyperparameter, {m{% \mu_i %}} is the estimate maintained for arm i,
   {m{% T_i%}} is the number of times arm {m{% i%}} was visited so far
   and {m{% \psi^* %}} denotes the Legendre-Fenchel transform of a convex function {m{% \psi %}}.
 
@@ -114,7 +114,7 @@ module type AlphaUCBParam = sig
   val k : int
   (** The number of actions {m{% K %}} .*)
   val alpha : float
-  (** The {m{% \alpha %}} parameter.*)
+(** The {m{% \alpha %}} parameter.*)
 end
 
 (** The {m{% \alpha $-$ \text{UCB} %}} Bandit for stochastic regret minimization described in [[1]] .*)
@@ -142,7 +142,7 @@ module MakeAlphaUCB (P : AlphaUCBParam) : Bandit
 (** Use to instanciate a [Bandit] from [MakeUCB1].*)
 module type KBanditParam = sig
   val k : int
-  (** The number of actions {m{% K %}} .*)
+(** The number of actions {m{% K %}} .*)
 end
 
 (** The UCB1 Bandit for stochastic regret minimization .*)
@@ -153,16 +153,16 @@ module MakeUCB1 (P: KBanditParam ) : Bandit
 
   {3:mdf MakeParametrizableEpsilonGreedy: {m{% \epsilon_n%}}-Greedy with a parametrizable rate.}
 
-  At round {m{% t%}}, the {m{% \epsilon_t%}}-Greedy algorithm[[5]] takes action {m{% \text{argmax}_{i=1,\cdots,K} \widehat{\mu_i} %}} 
+  At round {m{% t%}}, the {m{% \epsilon_t%}}-Greedy algorithm[[5]] takes action {m{% \text{argmax}_{i=1,\cdots,K} \widehat{\mu_i} %}}
   with probability {m{% 1-\epsilon%}} and an uniformly random action with probability {m{% \epsilon_t%}}.
   *)
 
-(** Used to instanciate algorithms that need a parametrizable exploration rate.*)
+(** Use to instanciate algorithms that need a parametrizable rate.*)
 module type RateBanditParam = sig
   val k : int
   (** The number of actions {m{% K %}} .*)
   val rate : int -> float
-(** The learning rate. can be fixed or decaying.  *)
+(** The rate. can be fixed or decaying.  *)
 end
 
 (** The Epsilon-Greedy Bandit with a parametrizable exploration rate.*)
@@ -173,9 +173,9 @@ module MakeParametrizableEpsilonGreedy (P : RateBanditParam) : Bandit
 
   This uses the exploration rate decay:
   {eq{%
-   \epsilon_t = \min{\left\\{ 1, \frac{cK}{d^2 t}\right\\}}
+  \epsilon_t = \min{\left\\{ 1, \frac{cK}{d^2 t}\right\\}}
   %}}
-  where {m{% d > 0 %}} should be taken as a tight bound on {m{% \max_{i=1,\cdots,K} \Delta_i%}}
+  where {m{% d > 0 %}} should be taken as a tight bound on {m{% \max_{i=1,\cdots,K} \Delta_i%}}.
   *)
 
 
@@ -184,7 +184,7 @@ module type DecayingEpsilonGreedyParam = sig
   val k : int
   (** The number of actions {m{% K %}} .*)
   val d : float
-  (** The {m{% d %}} parameter, a tight lower bound on {m{% \max_{i=1,\cdots,K} \Delta_i %}}.*)
+(** The {m{% d %}} parameter, a tight lower bound on {m{% \max_{i=1,\cdots,K} \Delta_i %}}.*)
 end
 
 (** The Epsilon-Greedy Bandit with the decaying exploration rate from [[5]].*)
@@ -192,9 +192,9 @@ module MakeDecayingEpsilonGreedy (P : DecayingEpsilonGreedyParam) : Bandit
 
 (**
 
-  {3:mdf MakeDecayingEpsilonGreedy: {m{% \epsilon_n%}}-Greedy with the decaying rate from [[5]].}
+  {3:mdf MakeEpsilonGreedy: {m{% \epsilon_n%}}-Greedy with a fixed exploration rate.}
 
-  This uses a fixed exploration {m{% \epsilon%}}.
+  This uses a fixed exploration rate {m{% \epsilon%}}.
   *)
 
 (** Use to instanciate a [Bandit] from [MakeEpsilonGreedy] .*)
@@ -202,22 +202,95 @@ module type EpsilonGreedyParam = sig
   val k : int
   (** The number of actions {m{% K %}} .*)
   val epsilon : float
-  (** The {m{% \epsilon %}} parameter.*)
+(** The {m{% \epsilon %}} parameter.*)
 end
 
 (** The Epsilon-Greedy Bandit with a fixed exploration rate.*)
 module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit
 
 (**
-  {2:mdf Exp3 family of algorithms.}
+  {2:mdf The Exp3 family of algorithms.}
 
   {3:mdf MakeExp3: EXP3 with a parametrizable rate.}
 
-  At round {m{% t%}}, the EXP3 algorithm[[1]] draws.
+  At round {m{% t%}}, the EXP3 algorithm[[1]] draws an arm from a probability
+  distribution {m{% p%}} and updates this distribution with a softmax operator:
+
+  {eq{%
+  p_{i,t+1} = \frac{\text{exp}(-\eta_t \tilde{L_{i,t}})}{\sum{k=1}^{K}\text{exp}(-\eta_t \tilde{L_{k,t}})}
+  %}}
+
+  where {m{% \tilde{L_{i,t}} %}} is the cumulative probability-normalized loss at 
+  time {m{% t%}} of arm {m{% i%}}.
   *)
 
-(** The Exp3 Bandit for adversarial regret minimization.*)
+(** The Exp3 Bandit for adversarial regret minimization with a parametrizable learning rate.*)
 module MakeExp3 (P : RateBanditParam) : Bandit
+
+(**
+  {3:mdf MakeDecayingExp3: EXP3 with the decaying rate from [[1]].}
+
+  This variant uses the learning rate decay:
+
+  {eq{%
+  \eta_t = \sqrt{\frac{ln K}{tK}}
+  %}}
+  
+  and enjoys the pseudo-regret bound:
+  {eq{%
+  \bar{R_n} \leq 2 \sqrt{nK \ln K} 
+  %}}
+
+  *)
+
+(** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
+module MakeDecayingExp3 (P : KBanditParam) : Bandit
+
+
+(**
+  {3:mdf MakeFixedExp3: EXP3 with a fixed rate.}
+
+  This uses a fixed rate {m{% \eta%}}.
+  *)
+
+(** Use to instanciate a [Bandit] from [MakeFixedExp3] .*)
+module type FixedExp3Param = sig
+  val k : int
+  (** The number of actions {m{% K %}} .*)
+  val eta : float
+(** The fixed learning rate {m{% \eta %}}.*)
+end
+
+(** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
+module MakeFixedExp3 (P : FixedExp3Param) : Bandit
+
+(**
+  {3:mdf MakeHorizonExp3: EXP3 with a known horizon [[1]].}
+
+  This variant optimizes for a known horizon {m{% n%}} and uses the learning rate:
+
+  {eq{%
+  \eta = \sqrt{\frac{2 ln K}{nK}}
+  %}}
+  
+  It has the pseudo-regret bound:
+  {eq{%
+  \bar{R_n} \leq \sqrt{2 nK \ln K} 
+  %}}
+
+  *)
+
+(** Use to instanciate a [Bandit] from [MakeHorizonExp3] .*)
+module type HorizonExp3Param = sig
+  val k : int
+  (** The number of actions {m{% K %}} .*)
+  val n : float
+(** The {m{% n %}} parameter, the horizon to optimize for.*)
+end
+
+(** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
+module MakeHorizonExp3 (P : FixedExp3Param) : Bandit
+
 
 (**
   {2:mdf More Functors: The doubling trick.}
@@ -243,11 +316,11 @@ end
   ranges. All rewards are linearly rescaled to a range (initially given by a RangeParam).
   When a value is observed above the range, the bandit algorithm is restarted
   and the range interval is doubled in that direction.  *)
-module WrapRange (R:RangeParam) (P:RateBanditParam) (B : functor (Pb:RateBanditParam) -> Bandit) : Bandit
+module WrapRange (R:RangeParam) (B:Bandit) : Bandit
 
 (** The WrapRange01 functor is a convenience aliasing of WrapRange with an
-  initial "standard" range of [0,1].  *)
-module WrapRange01 (P:RateBanditParam) (B : functor (Pb:RateBanditParam) -> Bandit) : Bandit
+  initial "standard" range of {m{% \left[ 0,1 \right] %}}.  *)
+module WrapRange01 (B:Bandit) : Bandit
 
 (**
   {1:ex Examples}
@@ -270,7 +343,7 @@ module WrapRange01 (P:RateBanditParam) (B : functor (Pb:RateBanditParam) -> Band
   [[4]] {{:https://arxiv.org/abs/1601.01974}Scale-Free Online Learning},
   Francesco Orabona, Dávid Pál
 
-  [[5]] {{:homes.di.unimi.it/~cesabian/Pubblicazioni/ml-02.pdf}Finite-time 
+  [[5]] {{:homes.di.unimi.it/~cesabian/Pubblicazioni/ml-02.pdf}Finite-time
   Analysis of the Multiarmed Bandit Problem},
   Peter Auer, Nicolo Cesa-Bianchi, Paul Fischer
   *)
