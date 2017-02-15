@@ -8,25 +8,26 @@
 
   {e %%VERSION%% — {{:%%PKG_HOMEPAGE%% }homepage}}
 
-  {1:mutband Mutable Bandit Modules}
+  {1:mutband Bandit Modules}
 
-  This library implements multi-armed bandits as mutable modules.
+  This library implements multi-armed bandits as modules.
   A bandit module is obtained by calling a functor with a bandit module
   parameter. The parameter gives the number of arms {m{% K %}} and
   the hyperparameters of the bandit.
-  The Bandit.getAction call is used to give a reward,
-  mutate the bandit game and obtain the next reward.
-
   *)
 
-(** A mutable bandit.  *)
+(** A bandit algorithm.  *)
 module type Bandit = sig
-  val getAction : float -> int
-(** getAction [r] mutates the bandit game one step, where [r] is the reward for
-  the last action.  The result of this call is the next action, encoded as an
-  integer in {m{% \\{ 0, \cdots , K-1 \\} %}}.  The reward range depends on the
-  bandit algorithm in use and the first reward provided to the algorithm is
-  discarded. *)
+  type bandit
+  (** The internal data structure of the bandit algorithm.*)
+  val initialBandit : bandit
+  (** The initial state of the bandit algorithm.*)
+  val step : bandit -> float -> int * bandit
+(** [step r] advances the bandit game one step, where [r] is the reward for
+  the last action. The result of this call is the next action, encoded as an
+  integer in {m{% \\{ 0, \cdots , K-1 \\} %}}, and the new state of the bandit.
+  The reward range depends on the bandit algorithm in use and the first reward
+  provided to the algorithm is discarded.*)
 end
 
 (** {1:functors Functors}
@@ -41,13 +42,6 @@ end
   let k=3
   end
   in MakeUCB1(P)]
-
-  and mutated in this manner:
-
-  [let newAction = UCB1.getAction reward ]
-
-  where [newAction] is the new action to be explored and [reward] is the
-  reward associated with the last action that the bandit algorithm took.
 
   The following algorithms are available:
   *)
@@ -75,6 +69,9 @@ end
 
   *)
 
+(** The internal state of a bandit that maintains estimates of arm means.*)
+type banditEstimates = {t:int; a:int; nVisits:int list;u:float list}
+
 (** Use to instanciate a [Bandit] from [MakeAlphaPhiUCB] .*)
 module type AlphaPhiUCBParam = sig
   val k : int
@@ -85,8 +82,7 @@ module type AlphaPhiUCBParam = sig
 (** The inverse of the Legendre-Fenchel transform of {m{% \psi %}}.  *)
 end
 
-
-module MakeAlphaPhiUCB (P : AlphaPhiUCBParam) : Bandit
+module MakeAlphaPhiUCB (P : AlphaPhiUCBParam) : Bandit with type bandit = banditEstimates
 (** The {m{% (\alpha,\psi) $-$ \text{UCB} %}} Bandit for stochastic regret minimization described in [[1]]. *)
 
 
@@ -118,7 +114,7 @@ module type AlphaUCBParam = sig
 end
 
 (** The {m{% \alpha $-$ \text{UCB} %}} Bandit for stochastic regret minimization described in [[1]] .*)
-module MakeAlphaUCB (P : AlphaUCBParam) : Bandit
+module MakeAlphaUCB (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates
 
 
 (**
@@ -146,7 +142,7 @@ module type KBanditParam = sig
 end
 
 (** The UCB1 Bandit for stochastic regret minimization .*)
-module MakeUCB1 (P: KBanditParam ) : Bandit
+module MakeUCB1 (P: KBanditParam ) : Bandit with type bandit = banditEstimates
 
 (**
   {2:mdf The Epsilon-Greedy family of algorithms.}
@@ -154,7 +150,7 @@ module MakeUCB1 (P: KBanditParam ) : Bandit
   {3:mdf MakeParametrizableEpsilonGreedy: {m{% \epsilon_n%}}-Greedy with a parametrizable rate.}
 
   At round {m{% t%}}, the {m{% \epsilon_t%}}-Greedy algorithm[[5]] takes action {m{% \text{argmax}_{i=1,\cdots,K} \widehat{\mu_i} %}}
-  with probability {m{% 1-\epsilon%}} and an uniformly random action with probability {m{% \epsilon_t%}}.
+  with probability {m{% 1-\epsilon_t%}} and an uniformly random action with probability {m{% \epsilon_t%}}.
   *)
 
 (** Use to instanciate algorithms that need a parametrizable rate.*)
@@ -166,7 +162,7 @@ module type RateBanditParam = sig
 end
 
 (** The Epsilon-Greedy Bandit with a parametrizable exploration rate.*)
-module MakeParametrizableEpsilonGreedy (P : RateBanditParam) : Bandit
+module MakeParametrizableEpsilonGreedy (P : RateBanditParam) : Bandit with type bandit = banditEstimates 
 
 (**
   {3:mdf MakeDecayingEpsilonGreedy: {m{% \epsilon_n%}}-Greedy with the decaying rate from [[5]].}
@@ -188,7 +184,7 @@ module type DecayingEpsilonGreedyParam = sig
 end
 
 (** The Epsilon-Greedy Bandit with the decaying exploration rate from [[5]].*)
-module MakeDecayingEpsilonGreedy (P : DecayingEpsilonGreedyParam) : Bandit
+module MakeDecayingEpsilonGreedy (P : DecayingEpsilonGreedyParam) : Bandit with type bandit = banditEstimates
 
 (**
 
@@ -206,7 +202,7 @@ module type EpsilonGreedyParam = sig
 end
 
 (** The Epsilon-Greedy Bandit with a fixed exploration rate.*)
-module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit
+module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit with type bandit = banditEstimates
 
 (**
   {2:mdf The Exp3 family of algorithms.}
@@ -220,12 +216,15 @@ module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit
   p_{i,t+1} = \frac{\text{exp}(-\eta_t \tilde{L_{i,t}})}{\sum{k=1}^{K}\text{exp}(-\eta_t \tilde{L_{k,t}})}
   %}}
 
-  where {m{% \tilde{L_{i,t}} %}} is the cumulative probability-normalized loss at 
+  where {m{% \tilde{L_{i,t}} %}} is the cumulative probability-normalized loss at
   time {m{% t%}} of arm {m{% i%}}.
   *)
 
+(** The internal state of an Exp3 bandit*)
+type banditPolicy = {t:int; a:int; w:float array}
+
 (** The Exp3 Bandit for adversarial regret minimization with a parametrizable learning rate.*)
-module MakeExp3 (P : RateBanditParam) : Bandit
+module MakeExp3 (P : RateBanditParam) : Bandit with type bandit = banditPolicy
 
 (**
   {3:mdf MakeDecayingExp3: EXP3 with the decaying rate from [[1]].}
@@ -235,16 +234,16 @@ module MakeExp3 (P : RateBanditParam) : Bandit
   {eq{%
   \eta_t = \sqrt{\frac{ln K}{tK}}
   %}}
-  
+
   and enjoys the pseudo-regret bound:
   {eq{%
-  \bar{R_n} \leq 2 \sqrt{nK \ln K} 
+  \bar{R_n} \leq 2 \sqrt{nK \ln K}
   %}}
 
   *)
 
 (** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
-module MakeDecayingExp3 (P : KBanditParam) : Bandit
+module MakeDecayingExp3 (P : KBanditParam) : Bandit with type bandit = banditPolicy
 
 
 (**
@@ -262,7 +261,7 @@ module type FixedExp3Param = sig
 end
 
 (** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
-module MakeFixedExp3 (P : FixedExp3Param) : Bandit
+module MakeFixedExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPolicy
 
 (**
   {3:mdf MakeHorizonExp3: EXP3 with a known horizon [[1]].}
@@ -272,10 +271,10 @@ module MakeFixedExp3 (P : FixedExp3Param) : Bandit
   {eq{%
   \eta = \sqrt{\frac{2 ln K}{nK}}
   %}}
-  
+
   It has the pseudo-regret bound:
   {eq{%
-  \bar{R_n} \leq \sqrt{2 nK \ln K} 
+  \bar{R_n} \leq \sqrt{2 nK \ln K}
   %}}
 
   *)
@@ -289,7 +288,7 @@ module type HorizonExp3Param = sig
 end
 
 (** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
-module MakeHorizonExp3 (P : FixedExp3Param) : Bandit
+module MakeHorizonExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPolicy
 
 
 (**
@@ -316,11 +315,11 @@ end
   ranges. All rewards are linearly rescaled to a range (initially given by a RangeParam).
   When a value is observed above the range, the bandit algorithm is restarted
   and the range interval is doubled in that direction.  *)
-module WrapRange (R:RangeParam) (B:Bandit) : Bandit
+module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit
 
 (** The WrapRange01 functor is a convenience aliasing of WrapRange with an
   initial "standard" range of {m{% \left[ 0,1 \right] %}}.  *)
-module WrapRange01 (B:Bandit) : Bandit
+module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit
 
 (**
   {1:ex Examples}
