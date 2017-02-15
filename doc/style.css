@@ -146,7 +146,7 @@ pre .code { background: inherit; }
 
 /* Images */
 
-img { margin-top: 1.25rem }
+img.ltxhtml { vertical-align : middle }
 
 /* Odig */
 
