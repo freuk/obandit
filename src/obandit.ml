@@ -72,7 +72,7 @@ module MakeUCB1 (P : BanditParam) : Bandit = struct
   let nVisits = Array.make P.n 0
   let k = ref 0
 
-  let f i = (u.(i) /. float_of_int (nVisits.(i))) +. ((P.rate !k) *. log (float_of_int (!k+1)) /. (float_of_int nVisits.(i)))
+  let f i = (u.(i) /. float_of_int (nVisits.(i))) +. ((P.rate !k) *. sqrt ( 2. *. log (float_of_int (!k+1)) /. (float_of_int nVisits.(i))) )
 
   let getAction x =
     let newA = if !k < P.n
