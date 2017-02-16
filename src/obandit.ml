@@ -3,17 +3,21 @@
  Distributed under the ISC license, see terms at the end of the file.
  %%NAME%% %%VERSION%%
  ---------------------------------------------------------------------------*)
+
 open BatList
 
-(*makes a comparator*)
+(* makes a comparator*)
 let makecmp v x y = Pervasives.compare (v x) (v y)
 
-(*gets the argmax of a function on a list*)
-let argmax f l = snd (BatList.min_max ~cmp:(makecmp f))
+(* gets the argmax of a function on a list*)
+let argmax f l = snd (BatList.min_max ~cmp:(makecmp f) l)
 
 (* gets the best of k arm according to a criteria f that uses a bandit as
  first argument*)
-let getA k b f = argmax (f b) (BatList.range 0 `To (b.k-1))
+let getA k b f = argmax (f b) (BatList.range 0 `To (k-1))
+
+(* increments a list at position i, return a new list*)
+let incList i l = BatList.modify_at i (fun x->x+1) l
 
 module type Bandit = sig
   type bandit
@@ -25,14 +29,14 @@ type banditEstimates = {t:int;
                         a:int;
                         nVisits:int list;
                         u:float list}
-let initialBanditEstimates = {t       = 0;
+let initialBanditEstimates k = {t       = 0;
                               a       = -1;
                               nVisits = BatList.make k 0;
                               u       = BatList.make k 0.}
 type banditPolicy = {t:int;
                      a:int;
                      w:float array}
-let initialBanditPolicy = {t = 1;
+let initialBanditPolicy k = {t = 1;
                            a = -1;
                            w = BatList.make k 1.}
 
@@ -51,9 +55,42 @@ module type KBanditParam = sig
   val k : int
 end
 
+module type RateBanditParam = sig
+  val k : int
+  val rate : int -> float
+end
+
+module type DecayingEpsilonGreedyParam = sig
+  val k : int
+  val c : float
+  val d : float
+end
+
+module type EpsilonGreedyParam = sig
+  val k : int
+  val epsilon : float
+end
+
+module type FixedExp3Param = sig
+  val k : int
+  val eta : float
+end
+
+module type HorizonExp3Param = sig
+  val k : int
+  val n : float
+end
+
+module type RangeParam = sig
+  val upper : float
+  val lower : float
+end
+
+(**************************** UCB *******************************)
+
 module MakeAlphaPhiUCB (P : AlphaPhiUCBParam) : Bandit with type bandit = banditEstimates =
 struct
-  type bandit = banditEstimates
+  type bandit = banditEstimates P.k
   let initialBandit = initialBanditEstimates
   let f b i = (List.nth b.u i /. float_of_int (List.nth b.nVisits i)) +.
               P.invLFPhi (P.alpha *. ln b.t /. (List.nth b.nVisits i))
@@ -62,8 +99,8 @@ struct
     in (a,
         {t = b.t+1;
          a = a;
-         nVisits = BatList.modify_at a (fun x -> x + 1) b.nVisits;
-         u = BatList.modify_at a (fun x -> x) b.u})
+         nVisits = incList a b.nVisits;
+         u = BatList.modify_at a (fun ui -> ui + x) b.u})
 end
 
 module MakeAlphaUCB (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates =
@@ -78,29 +115,66 @@ module MakeUCB1 (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates 
                  let alpha=4.
                end)
 
+(**************************** EPSILON GREEDY *******************************)
+
+module MakeParametrizableEpsilonGreedy (P : RateBanditParam) : Bandit with type bandit = banditEstimates =
+struct
+  type bandit = banditEstimates
+  let initialBandit = initialBanditEstimates p.k
+
+  let f b i = (List.nth b.u i /. float_of_int (List.nth b.nVisits i))
+
+  let step b x =
+    let a = if b.t < P.k
+    then b.t
+    else if Random.float 1. < (P.rate b.t) then
+      getA P.k b f
+    else
+      Random.int P.k
+    in (a,
+       {t=b.t+1;
+        a=a;
+        nVisits = incList a b.nVisits;
+        u = BatList.modify_at a (fun ui -> ui + x) b.u})
+end
+
+module MakeDecayingEpsilonGreedy (P : DecayingEpsilonGreedyParam) : Bandit with type bandit = banditEstimates  =
+  MakeParametrizableEpsilonGreedy(struct
+                                    include P
+                                    let rate t = min 1 ((c *. (float_of_int P.k)) /.( P.d *. P.d *. t))
+                                  end)
+
+module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit with type bandit = banditEstimates=
+  MakeParametrizableEpsilonGreedy(struct
+                                    include P
+                                    let rate _ = P.epsilon
+                                  end)
+
+(********************************* EXP3 **********************************)
+
 module MakeExp3 (P : RateBanditParam) : Bandit with type bandit = banditPolicy =
 struct
   type bandit = banditPolicy
-  let initialBandit = initialBanditPolicy
-                                                                         
-  let wToP b sum w = 
+  let initialBandit = initialBanditPolicy P.k
+
+  let wToP b sum w =
     ((1.0 -. (P.rate b.t)) *. (w /. sum)) +. ((P.rate b.t) /. (float_of_int b.t))
 
   let step b x =
-    if b.a < 0 
+    if b.a < 0
     then
-      let a = Random.int P.k 
+      let a = Random.int P.k
       in (a,
           {t = b.t+1;
            a = a;
            w = b.w})
-    else
+      else
         let sum = BatList.fsum b.w
         in let f wi = wi *. (exp ((P.rate !k) *. x /. ((float_of_int !k) *. (wToP b sum wi))))
         in let w = BatList.modify_at a f b.w;
-        in let p = 
+        in let p =
           let sum = BatList.fsum w
-          in let f wi = 
+          in let f wi =
             ((1.0 -. (P.rate b.t)) *. (w /. sum)) +. ((P.rate b.t) /. (float_of_int b.t))
           in List.map f w
         in let r =
@@ -114,53 +188,32 @@ struct
             else
               sample (i+1) (acc +. p.(i+1))
         in let a = sample (-1) 0.
-        in 
+        in
           (a,
-          {t = b.t+1;
-           a = a;
-           w = w})
+           {t = b.t+1;
+            a = a;
+            w = w})
 end
 
 module MakeDecayingExp3 (P : KBanditParam) : Bandit with type bandit = banditPolicy =
   MakeExp3(struct
              include P
-             let rate t = sqrt ( ln P.k /. (t *. P.k) = 
+             let rate t = sqrt ( ln (float_of_int P.k) /. (float_of_int (t *. P.k)))
            end)
 
-module MakeEpsilonGreedy (P : BanditParam) : Bandit = struct
-  let a = ref (-1)
-  let u = Array.make P.n 0.
-  let nVisits = Array.make P.n 0
-  let k = ref 0
+module MakeFixedExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPolicy =
+  MakeExp3(struct
+             include P
+             let rate _ = P.eta
+           end)
 
-  let f i = u.(i) /. float_of_int (nVisits.(i))
+module MakeHorizonExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPolicy =
+  MakeExp3(struct
+             include P
+             let rate _ = sqrt (2. *. (ln (float_of_int P.k)) /. (float_of_int (P.n * P.k)))
+           end)
 
-  let getAction x =
-    let newA = if !k < P.n
-    then
-      begin
-        (if !a > -1 then u.(!k) <- x else ());
-        !k
-      end
-    else
-      begin
-        u.(!a) <- u.(!a) +. x;
-        if Random.float 1. < (P.rate !k) then
-          snd (BatList.min_max ~cmp:(makecmp f) (BatList.of_enum (0 -- (P.n-1))))
-        else
-          Random.int P.n
-      end
-    in (nVisits.(newA) <- nVisits.(newA) + 1;
-        a := newA;
-        k := !k+1;
-        newA)
-end
-
-module type RangeParam = sig
-  val upper : float
-  val lower : float
-end
-
+(*******************************DOUBLING TRICK*************************)
 module WrapRange (R:RangeParam) (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit = struct
   let makeM () = (module B(P) : Bandit)
   let m = ref (makeM ())
@@ -192,4 +245,3 @@ module WrapRange01 = WrapRange(struct let upper=1. let lower=0. end)
  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  ---------------------------------------------------------------------------*)
-

@@ -174,7 +174,7 @@ module MakeParametrizableEpsilonGreedy (P : RateBanditParam) : Bandit with type 
   {eq{%
   \epsilon_t = \min{\left\\{ 1, \frac{cK}{d^2 t}\right\\}}
   %}}
-  where {m{% d > 0 %}} should be taken as a tight bound on {m{% \max_{i=1,\cdots,K} \Delta_i%}}.
+  where {m{% d > 0 %}} should be taken as a tight lower bound on {m{% \max_{i=1,\cdots,K} \Delta_i%}} and {m{% c > 0%}} is a hyperparameter.
   *)
 
 
@@ -182,8 +182,10 @@ module MakeParametrizableEpsilonGreedy (P : RateBanditParam) : Bandit with type 
 module type DecayingEpsilonGreedyParam = sig
   val k : int
   (** The number of actions {m{% K %}} .*)
+  val c : float
+(** The {m{% c%}} hyperparameter.*)
   val d : float
-(** The {m{% d %}} parameter, a tight lower bound on {m{% \max_{i=1,\cdots,K} \Delta_i %}}.*)
+(** The {m{% d%}} hyperparameter, a tight lower bound on {m{% \max_{i=1,\cdots,K} \Delta_i %}}.*)
 end
 
 (** The Epsilon-Greedy Bandit with the decaying exploration rate from [[5]].*)
