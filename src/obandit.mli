@@ -70,7 +70,10 @@ end
   *)
 
 (** The internal state of a bandit that maintains estimates of arm means.*)
-type banditEstimates = {t:int; a:int; nVisits:int list;u:float list}
+type banditEstimates = {t:int; (**The index of the step*)
+                        a:int; (**The last action taken.*)
+                        nVisits:int list; (**The visit counts by arm.*)
+                        u:float list (**The cumulative arm reward observations.*)}
 
 (** Use to instanciate a [Bandit] from [MakeAlphaPhiUCB] .*)
 module type AlphaPhiUCBParam = sig
@@ -221,7 +224,9 @@ module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit with type bandit = ba
   *)
 
 (** The internal state of an Exp3 bandit*)
-type banditPolicy = {t:int; a:int; w:float array}
+type banditPolicy = {t:int; (**The index of the step*)
+                     a:int; (**The last action taken.*)
+                     w:float array (**The weights of the arm that define the policy.*)}
 
 (** The Exp3 Bandit for adversarial regret minimization with a parametrizable learning rate.*)
 module MakeExp3 (P : RateBanditParam) : Bandit with type bandit = banditPolicy
