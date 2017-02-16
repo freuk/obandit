@@ -22,8 +22,9 @@
 
 open Obandit
 
-let doTest depth bm str=
-  let module BM = (val (bm):Bandit)
+let doTest depth strbm=
+  let str,bm = strbm
+  in let module BM = (val (bm):Bandit)
   in let rsum = ref 0.
   in let a = ref 0
   in let b = ref BM.initialBandit
@@ -54,7 +55,10 @@ let () =
     let k = 2
   end
 
-  in let ucb1 = (module WrapRange01(MakeUCB1(Pk)):Bandit)
-  in let exp3 = (module WrapRange01(MakeDecayingExp3(Pk)):Bandit)
-  in let dtn n = doTest n ucb1 "UCB1"; doTest n exp3 "EXP3"; Printf.printf "%s" "\n"
+  in let bl = [("ucb",   (module MakeUCB1(Pk):Bandit));
+               ("exp3",  (module MakeDecayingExp3(Pk):Bandit));
+               ("ucbr", (module WrapRange01(MakeUCB1(Pk)):Bandit));
+               ("exp3r", (module WrapRange01(MakeDecayingExp3(Pk)):Bandit))]
+
+  in let dtn n = List.iter (doTest n) bl; Printf.printf "%s" "\n"
   in List.iter dtn [3000;30000]

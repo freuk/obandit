@@ -4,20 +4,6 @@
  %%NAME%% %%VERSION%%
  ---------------------------------------------------------------------------*)
 
-
-(* makes a comparator*)
-let makecmp v x y = Pervasives.compare (v x) (v y)
-
-(* gets the argmax of a function on a list*)
-let argmax f l = snd (BatList.min_max ~cmp:(makecmp f) l)
-
-(* gets the best of k arm according to a criteria f that uses a bandit as
- first argument*)
-let getA k f = argmax f (BatList.range 0 `To (k-1))
-
-(* increments a list at position i, return a new list*)
-let incList i l = BatList.modify_at i (fun x->x+1) l
-
 module type Bandit = sig
   type bandit
   val initialBandit : bandit
@@ -29,15 +15,15 @@ type banditEstimates = {t:int;
                         nVisits:int list;
                         u:float list}
 let initialBanditEstimates k = {t       = 0;
-                              a       = -1;
-                              nVisits = BatList.make k 0;
-                              u       = BatList.make k 0.}
+                                a       = -1;
+                                nVisits = BatList.make k 0;
+                                u       = BatList.make k 0.}
 type banditPolicy = {t:int;
                      a:int;
                      w:float list}
 let initialBanditPolicy k = {t = 1;
-                           a = -1;
-                           w = BatList.make k 1.}
+                             a = -1;
+                             w = BatList.make k 1.}
 
 module type AlphaPhiUCBParam = sig
   val k : int
@@ -85,21 +71,38 @@ module type RangeParam = sig
   val lower : float
 end
 
+(***************************Utilities*****************************)
+
+(* makes a comparator*)
+let makecmp v x y = Pervasives.compare (v x) (v y)
+
+(* gets the argmax of a function on a list*)
+let argmax f l = snd (BatList.min_max ~cmp:(makecmp f) l)
+
+(* gets the best of k arm according to a criteria f that uses a bandit as
+ first argument*)
+let getA k f = argmax f (BatList.range 0 `To (k-1))
+
+(* increments a list at position i, return a new list*)
+let incList i l = BatList.modify_at i (fun x->x+1) l
+
 (**************************** UCB *******************************)
 
 module MakeAlphaPhiUCB (P:AlphaPhiUCBParam) : Bandit with type bandit = banditEstimates =
 struct
   type bandit = banditEstimates
   let initialBandit = initialBanditEstimates P.k
-  let f (b:banditEstimates) i = (List.nth b.u i /. float_of_int (List.nth b.nVisits i)) +.
-              P.invLFPhi (P.alpha *. log (float_of_int b.t) /. (float_of_int (List.nth b.nVisits i)))
+  let f (b:banditEstimates) i =
+    let ti = float_of_int (List.nth b.nVisits i)
+    and t = float_of_int b.t
+    in (List.nth b.u i /. ti) +. P.invLFPhi (P.alpha *. (log t) /. ti)
   let step (b:banditEstimates) x =
     let a = if b.t < P.k then b.t else getA P.k (f b)
     in (a,
         {t = b.t+1;
          a = a;
-         nVisits = incList a b.nVisits;
-         u = BatList.modify_at a (fun ui -> ui +. x) b.u})
+         nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
+         u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u})
 end
 
 module MakeAlphaUCB (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates =
@@ -131,10 +134,10 @@ struct
     else
       Random.int P.k
     in (a,
-       {t=b.t+1;
-        a=a;
-        nVisits = incList a b.nVisits;
-        u = BatList.modify_at a (fun ui -> ui +. x) b.u})
+        {t=b.t+1;
+         a=a;
+         nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
+         u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u})
 end
 
 module MakeDecayingEpsilonGreedy (P : DecayingEpsilonGreedyParam) : Bandit with type bandit = banditEstimates  =
@@ -219,30 +222,30 @@ type 'b rangedBandit = {bandit:'b;
                         l:float}
 
 module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit = struct
-  type bandit = B.bandit rangedBandit 
+  type bandit = B.bandit rangedBandit
   let initialBandit = {bandit=B.initialBandit;
                        u=R.upper;
                        l=R.lower}
-  let step b x = 
+  let step b x =
     if x>b.u then
       let u' = b.l +. ((b.u -. b.l) *. 2.0)
       in let a,b' = B.step B.initialBandit ((x -. b.l) /. (u' -. b.l))
       in (a,{b with bandit=B.initialBandit;
                     u=u'})
-    else if x<b.l then
-      let l' = b.u -. ((b.u -. b.l) *. 2.0)
-      in let a,b' = B.step B.initialBandit ((x -. l') /. (b.u -. l'))
-      in (a,{b with bandit=B.initialBandit;
-                    l=l'})
-    else 
-      let a,b' = B.step b.bandit  ((x -. b.l) /. (b.u -. b.l))
-      in (a,{b with bandit=b'})
+      else if x<b.l then
+        let l' = b.u -. ((b.u -. b.l) *. 2.0)
+        in let a,b' = B.step B.initialBandit ((x -. l') /. (b.u -. l'))
+        in (a,{b with bandit=B.initialBandit;
+                      l=l'})
+        else
+          let a,b' = B.step b.bandit  ((x -. b.l) /. (b.u -. b.l))
+          in (a,{b with bandit=b'})
 end
 
 (** The WrapRange01 functor is a convenience aliasing of WrapRange with an
   initial "standard" range of {m{% \left[ 0,1 \right] %}}.  *)
 module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit =
-WrapRange(struct let upper=1. let lower=0. end)(B)
+  WrapRange(struct let upper=1. let lower=0. end)(B)
 
 (*---------------------------------------------------------------------------
  Copyright (c) 2017 Valentin Reis
