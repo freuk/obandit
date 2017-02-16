@@ -108,7 +108,7 @@ module MakeAlphaUCB (P : AlphaUCBParam) : Bandit with type bandit = banditEstima
                     let invLFPhi x = sqrt (x /. 2.)
                   end)
 
-module MakeUCB1 (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates =
+module MakeUCB1 (P : KBanditParam) : Bandit with type bandit = banditEstimates =
   MakeAlphaUCB(struct
                  include P
                  let alpha=4.
@@ -213,21 +213,36 @@ module MakeHorizonExp3 (P : HorizonExp3Param) : Bandit with type bandit = bandit
            end)
 
 (*******************************DOUBLING TRICK*************************)
-(*module WrapRange (R:RangeParam) (P:BanditParam) (B : functor (Pb:BanditParam) -> Bandit) : Bandit = struct*)
-  (*let makeM () = (module B(P) : Bandit)*)
-  (*let m = ref (makeM ())*)
 
-  (*let u = ref R.upper*)
-  (*let l = ref R.lower*)
+type 'b rangedBandit = {bandit:'b;
+                        u:float;
+                        l:float}
 
-  (*let getAction x =*)
-    (*if x > !u then (u := !l +. ((!u -. !l) *. 2.0); m := makeM ());*)
-    (*if x < !l then (l := !u -. ((!u -. !l )*. 2.0); m := makeM ());*)
-    (*let module M = (val (!m))*)
-    (*in M.getAction ((x -. !l) /. (!u -. !l))*)
-(*end*)
+module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit = struct
+  type bandit = B.bandit rangedBandit 
+  let initialBandit = {bandit=B.initialBandit;
+                       u=R.upper;
+                       l=R.lower}
+  let step b x = 
+    if x>b.u then
+      let u' = b.l +. ((b.u -. b.l) *. 2.0)
+      in let a,b' = B.step B.initialBandit ((x -. b.l) /. (u' -. b.l))
+      in (a,{b with bandit=B.initialBandit;
+                    u=u'})
+    else if x<b.l then
+      let l' = b.u -. ((b.u -. b.l) *. 2.0)
+      in let a,b' = B.step B.initialBandit ((x -. l') /. (b.u -. l'))
+      in (a,{b with bandit=B.initialBandit;
+                    l=l'})
+    else 
+      let a,b' = B.step b.bandit  ((x -. b.l) /. (b.u -. b.l))
+      in (a,{b with bandit=b'})
+end
 
-(*module WrapRange01 = WrapRange(struct let upper=1. let lower=0. end)*)
+(** The WrapRange01 functor is a convenience aliasing of WrapRange with an
+  initial "standard" range of {m{% \left[ 0,1 \right] %}}.  *)
+module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit =
+WrapRange(struct let upper=1. let lower=0. end)(B)
 
 (*---------------------------------------------------------------------------
  Copyright (c) 2017 Valentin Reis

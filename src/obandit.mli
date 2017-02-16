@@ -81,7 +81,7 @@ module type AlphaPhiUCBParam = sig
   (** The number of actions {m{% K %}} .*)
   val alpha : float
   (** The {m{% \alpha %}} parameter.*)
-  val invLFPhi: float
+  val invLFPhi: float -> float
 (** The inverse of the Legendre-Fenchel transform of {m{% \psi %}}.  *)
 end
 
@@ -228,7 +228,7 @@ module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit with type bandit = ba
 (** The internal state of an Exp3 bandit*)
 type banditPolicy = {t:int; (**The index of the step*)
                      a:int; (**The last action taken.*)
-                     w:float array (**The weights of the arm that define the policy.*)}
+                     w:float list (**The weights of the arm that define the policy.*)}
 
 (** The Exp3 Bandit for adversarial regret minimization with a parametrizable learning rate.*)
 module MakeExp3 (P : RateBanditParam) : Bandit with type bandit = banditPolicy
@@ -290,13 +290,12 @@ module MakeFixedExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPoli
 module type HorizonExp3Param = sig
   val k : int
   (** The number of actions {m{% K %}} .*)
-  val n : float
+  val n : int 
 (** The {m{% n %}} parameter, the horizon to optimize for.*)
 end
 
 (** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
-module MakeHorizonExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPolicy
-
+module MakeHorizonExp3 (P : HorizonExp3Param) : Bandit with type bandit = banditPolicy
 
 (**
   {2:mdf More Functors: The doubling trick.}
@@ -311,22 +310,27 @@ module MakeHorizonExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPo
 
 (** A Reward range.*)
 module type RangeParam = sig
-  (** The upper value of the range*)
   val upper : float
-  (** The lower value of the range*)
+  (** The upper value of the range*)
   val lower : float
+  (** The lower value of the range*)
 end
+
+(** The type of a bandit with a range.*)
+type 'b rangedBandit = {bandit:'b; (**The original type of the bandit.*)
+                        u:float; (**The upper reward bound.*)
+                        l:float  (**The lower reward bound.*)}
 
 (** The WrapRange functor wraps a bandit algorithm with the doubling trick.
   This heuristic allows to use a bandit algorithm without knowing the reward
   ranges. All rewards are linearly rescaled to a range (initially given by a RangeParam).
   When a value is observed above the range, the bandit algorithm is restarted
   and the range interval is doubled in that direction.  *)
-module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit
+module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit
 
 (** The WrapRange01 functor is a convenience aliasing of WrapRange with an
   initial "standard" range of {m{% \left[ 0,1 \right] %}}.  *)
-module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit
+module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit
 
 (**
   {1:ex Examples}
@@ -335,7 +339,7 @@ module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit
 
   {1:refs References}
 
-  [[1]] {{:https://arxiv.org/abs/1204.5721}Regret Analysis of Stochastic and
+  [[1]] {{:arxiv.org/abs/1204.5721}Regret Analysis of Stochastic and
   Nonstochastic Multi-armed Bandit Problems},
   Sebastien Bubeck and Nicolo Cesa-Bianchi.
 
@@ -346,7 +350,7 @@ module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit
   [[3]] {{:arxiv.org/abs/1305.6646}Normalized Online Learning},
   Stephane Ross, Paul Mineiro, John Langford
 
-  [[4]] {{:https://arxiv.org/abs/1601.01974}Scale-Free Online Learning},
+  [[4]] {{:arxiv.org/abs/1601.01974}Scale-Free Online Learning},
   Francesco Orabona, Dávid Pál
 
   [[5]] {{:homes.di.unimi.it/~cesabian/Pubblicazioni/ml-02.pdf}Finite-time
