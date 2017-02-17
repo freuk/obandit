@@ -4,6 +4,7 @@ with import <nixpkgs> {};
     name = "baseOcaml";
     buildInputs =
     [ bzip2
+    gmp
     (texlive.combine {
     inherit (texlive) cases scheme-small;
     })
