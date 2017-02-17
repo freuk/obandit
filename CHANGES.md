@@ -1,3 +1,12 @@
+v0.2 2017-02-17 Grenoble
+--------------------------
+
+* Interface changes. Introducing immutable versions of the algorithms.
+* Documentation overhaul with mathematical aspects.
+* Use the formalism from S.Bubeck and N.Cesa-Bianchi's survey
+  "Regret analysis of Stochastic and Nonstochastic Multi-Armed
+  Bandit Problems".
+
 v0.1.42 2017-02-10 Grenoble
 --------------------------
 
