@@ -44,10 +44,10 @@ let doTest depth strbm=
     end
     done;
     Printf.printf "%s: %f " str (!rsum /. (float_of_int !n));
-    (*if (!rsum /. (float_of_int !n) > 0.37) then*)
-      (*Printf.printf "converges.%s" ""*)
-    (*else*)
-      (*failwith "insufficient performance of the algorithm."*)
+    if (!rsum /. (float_of_int !n) > 0.37) then
+      Printf.printf "converges. %s " ""
+    else
+      failwith "insufficient performance of the algorithm."
   end
 
 let () =
@@ -55,9 +55,9 @@ let () =
     let k = 2
   end
 
-  in let bl = [("ucb",   (module MakeUCB1(Pk):Bandit));
-               ("exp3",  (module MakeDecayingExp3(Pk):Bandit));
-               ("ucbr", (module WrapRange01(MakeUCB1(Pk)):Bandit));
+  in let bl = [("ucb"  , (module MakeUCB1(Pk):Bandit));
+               ("exp3" , (module MakeDecayingExp3(Pk):Bandit));
+               ("ucbr" , (module WrapRange01(MakeUCB1(Pk)):Bandit));
                ("exp3r", (module WrapRange01(MakeDecayingExp3(Pk)):Bandit))]
 
   in let dtn n = List.iter (doTest n) bl; Printf.printf "%s" "\n"
