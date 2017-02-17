@@ -73,18 +73,26 @@ end
 
 (***************************Utilities*****************************)
 
-(* makes a comparator*)
+(* Makes a comparator function.*)
 let makecmp v x y = Pervasives.compare (v x) (v y)
 
-(* gets the argmax of a function on a list*)
+(* Gets the argmax of a function on a list.*)
 let argmax f l = snd (BatList.min_max ~cmp:(makecmp f) l)
 
-(* gets the best of k arm according to a criteria f that uses a bandit as
- first argument*)
+(* argmax of the list [0,..,k-1] according to criteria f. *)
 let getA k f = argmax f (BatList.range 0 `To (k-1))
 
-(* increments a list at position i, return a new list*)
+(* Increments a list at position i, return a new list.*)
 let incList i l = BatList.modify_at i (fun x->x+1) l
+
+(* Sample an integer from a probability distribution.*)
+let sample p =
+  let r = Random.float (BatList.fsum p)
+  in let rec sample i acc = function
+    |p::ps -> let ap = acc +. p
+     in if (ap > r) then i+1 else sample (i+1) ap ps
+    |[] -> i+1
+  in sample (-1) 0. p
 
 (**************************** UCB *******************************)
 
@@ -98,11 +106,11 @@ struct
     in (List.nth b.u i /. ti) +. P.invLFPhi (P.alpha *. (log t) /. ti)
   let step (b:banditEstimates) x =
     let a = if b.t < P.k then b.t else getA P.k (f b)
-    in (a,
+    in a,
         {t = b.t+1;
          a = a;
          nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
-         u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u})
+         u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u}
 end
 
 module MakeAlphaUCB (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates =
@@ -133,11 +141,11 @@ struct
       getA P.k (f b)
     else
       Random.int P.k
-    in (a,
-        {t=b.t+1;
-         a=a;
-         nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
-         u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u})
+    in a,
+       {t=b.t+1;
+        a=a;
+        nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
+        u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u}
 end
 
 module MakeDecayingEpsilonGreedy (P : DecayingEpsilonGreedyParam) : Bandit with type bandit = banditEstimates  =
@@ -167,24 +175,16 @@ struct
   let step b x =
     let a,w =
       if b.a < 0
-      then (Random.int P.k,b.w)
+      then Random.int P.k,b.w
       else
         let f wi = wi *. (exp ((P.rate b.t) *. x /. ((float_of_int P.k) *. (wToP (BatList.fsum b.w) b.t wi))))
         in let w = BatList.modify_at b.a f b.w;
         in let p = List.map (wToP (BatList.fsum w) b.t) w
-        in let r = Random.float (BatList.fsum p)
-        in let rec sample i acc =
-          if i+2=P.k then i+1
-          else
-            if (acc +. (List.nth p (i+1)) > r) then
-              i+1
-            else
-              sample (i+1) (acc +. List.nth p (i+1))
-        in (sample (-1) 0.,w)
-    in (a,
-        {t = b.t+1;
-         a = a;
-         w = w})
+        in (sample p,w)
+    in a,
+       {t = b.t+1;
+        a = a;
+        w = w}
 end
 
 module MakeDecayingExp3 (P : KBanditParam) : Bandit with type bandit = banditPolicy =
@@ -232,11 +232,8 @@ module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit 
           in (a,{b with bandit=b'})
 end
 
-(** The WrapRange01 functor is a convenience aliasing of WrapRange with an
-  initial "standard" range of {m{% \left[ 0,1 \right] %}}.  *)
 module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit =
   WrapRange(struct let upper=1. let lower=0. end)(B)
-
 (*---------------------------------------------------------------------------
  Copyright (c) 2017 Valentin Reis
 

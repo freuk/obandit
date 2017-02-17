@@ -301,9 +301,9 @@ module MakeHorizonExp3 (P : HorizonExp3Param) : Bandit with type bandit = bandit
   {2:mdf More Functors: The doubling trick.}
 
   Reward normalization in online stochastic and/or adversarial learning is a hard problem.
-  While this is well studied in online learning [[2]][[3]][[4]], it isn't clear how
-  to manage this in the case of bandits.
-  The [WrapRange] Functors applies a heuristic solution known as the doubling trick.
+  While this is well studied in online learning [[2]][[3]][[4]], there is no
+  well studied procedure for bandits yet.
+  The [WrapRange] Functors applies the heuristic solution known as the doubling trick.
   A convenience [WrapRange01] is provided for rewards that are initially thought
   to lie in {m{% [0,1]%}}.
   *)
