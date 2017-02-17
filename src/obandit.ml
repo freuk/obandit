@@ -154,34 +154,25 @@ module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit with type bandit = ba
 
 (********************************* EXP3 **********************************)
 
+(* initial a=-1 t=1 w=array of 1s*)
 module MakeExp3 (P : RateBanditParam) : Bandit with type bandit = banditPolicy =
 struct
   type bandit = banditPolicy
   let initialBandit = initialBanditPolicy P.k
 
-  let wToP b sum w =
-    ((1.0 -. (P.rate b.t)) *. (w /. sum)) +. ((P.rate b.t) /. (float_of_int b.t))
+  let wToP wsum t wi =
+    let eta = P.rate t
+    in ((1.0 -. eta) *. wi /. wsum) +. (eta /. float_of_int P.k)
 
   let step b x =
-    if b.a < 0
-    then
-      let a = Random.int P.k
-      in (a,
-          {t = b.t+1;
-           a = a;
-           w = b.w})
+    let a,w =
+      if b.a < 0
+      then (Random.int P.k,b.w)
       else
-        let sum = BatList.fsum b.w
-        in let f wi = wi *. (exp ((P.rate b.t) *. x /. ((float_of_int b.t) *. (wToP b sum wi))))
+        let f wi = wi *. (exp ((P.rate b.t) *. x /. ((float_of_int P.k) *. (wToP (BatList.fsum b.w) b.t wi))))
         in let w = BatList.modify_at b.a f b.w;
-        in let p =
-          let sum = BatList.fsum w
-          in let f wi =
-            ((1.0 -. (P.rate b.t)) *. (wi /. sum)) +. ((P.rate b.t) /. (float_of_int b.t))
-          in List.map f w
-        in let r =
-          let sump = BatList.fsum p
-          in Random.float sump
+        in let p = List.map (wToP (BatList.fsum w) b.t) w
+        in let r = Random.float (BatList.fsum p)
         in let rec sample i acc =
           if i+2=P.k then i+1
           else
@@ -189,12 +180,11 @@ struct
               i+1
             else
               sample (i+1) (acc +. List.nth p (i+1))
-        in let a = sample (-1) 0.
-        in
-          (a,
-           {t = b.t+1;
-            a = a;
-            w = w})
+        in (sample (-1) 0.,w)
+    in (a,
+        {t = b.t+1;
+         a = a;
+         w = w})
 end
 
 module MakeDecayingExp3 (P : KBanditParam) : Bandit with type bandit = banditPolicy =
