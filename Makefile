@@ -1,6 +1,6 @@
 .PHONY: doc
 doc:
-	nix-shell --run "topkg doc --docflags='-g ltxhtml.cma'"
+	nix-shell --run "topkg doc --docflags='-g odoc_custom.cma'"
 
 .PHONY: docdeploy
 docdeploy:
