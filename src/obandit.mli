@@ -1,5 +1,5 @@
-(*---------------------------------------------------------------------------
  Copyright (c) 2017 Valentin Reis. All rights reserved.
+(*---------------------------------------------------------------------------
  Distributed under the ISC license, see terms at the end of the file.
  %%NAME%% %%VERSION%%
  ---------------------------------------------------------------------------*)
@@ -375,25 +375,25 @@ module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit
 
   {1:refs References}
 
-  [[1]] {{:arxiv.org/abs/1204.5721}Regret Analysis of Stochastic and
+  [[1]] {{:http://arxiv.org/abs/1204.5721}Regret Analysis of Stochastic and
   Nonstochastic Multi-armed Bandit Problems},
   Sebastien Bubeck and Nicolo Cesa-Bianchi.
 
-  [[2]] {{:jmlr.org/papers/volume12/duchi11a/duchi11a.pdf}Adaptive Subgradient
+  [[2]] {{:http://jmlr.org/papers/volume12/duchi11a/duchi11a.pdf}Adaptive Subgradient
   methods for Online Learning and Stochastic Optimization},
   John Duchi , Elad Hazan and Yoram Singer.
 
-  [[3]] {{:arxiv.org/abs/1305.6646}Normalized Online Learning},
+  [[3]] {{:http://arxiv.org/abs/1305.6646}Normalized Online Learning},
   Stephane Ross, Paul Mineiro, John Langford
 
-  [[4]] {{:arxiv.org/abs/1601.01974}Scale-Free Online Learning},
+  [[4]] {{:http://arxiv.org/abs/1601.01974}Scale-Free Online Learning},
   Francesco Orabona, Dávid Pál
 
-  [[5]] {{:homes.di.unimi.it/~cesabian/Pubblicazioni/ml-02.pdf}Finite-time
+  [[5]] {{:http://homes.di.unimi.it/~cesabian/Pubblicazioni/ml-02.pdf}Finite-time
   Analysis of the Multiarmed Bandit Problem},
   Peter Auer, Nicolo Cesa-Bianchi, Paul Fischer
 
-  [[6]] {{:https://arxiv.org/abs/1102.2490}The KL-UCB Algorithm for Bounded 
+  [[6]] {{:http://arxiv.org/abs/1102.2490}The KL-UCB Algorithm for Bounded 
   Stochastic Bandits and Beyond},
   Aurélien Garivier, Olivier Cappé
   *)
