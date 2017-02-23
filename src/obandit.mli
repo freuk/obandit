@@ -1,5 +1,5 @@
- Copyright (c) 2017 Valentin Reis. All rights reserved.
 (*---------------------------------------------------------------------------
+ Copyright (c) 2017 Valentin Reis. All rights reserved.
  Distributed under the ISC license, see terms at the end of the file.
  %%NAME%% %%VERSION%%
  ---------------------------------------------------------------------------*)
@@ -194,7 +194,7 @@ module type DecayingEpsilonGreedyParam = sig
   val c : float
 (** The $ c$ hyperparameter.*)
   val d : float
-(** The $ d$ hyperparameter, a tight lower bound on $ \max_{i=1,\cdots,K} \Delta_i $.*)
+(** The $ d$ hyperparameter, a tight lower bound on $ \max_\{i=1,\cdots,K\} \Delta_i $.*)
 end
 
 (** The Epsilon-Greedy Bandit with the decaying exploration rate from [[5]].*)
