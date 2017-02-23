@@ -107,10 +107,10 @@ struct
   let step (b:banditEstimates) x =
     let a = if b.t < P.k then b.t else getA P.k (f b)
     in a,
-        {t = b.t+1;
-         a = a;
-         nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
-         u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u}
+       {t = b.t+1;
+        a = a;
+        nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
+        u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u}
 end
 
 module MakeAlphaUCB (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates =
@@ -204,6 +204,56 @@ module MakeHorizonExp3 (P : HorizonExp3Param) : Bandit with type bandit = bandit
              include P
              let rate _ = sqrt (2. *. (log (float_of_int P.k)) /. (float_of_int (P.n * P.k)))
            end)
+
+(************************ KL-UCB *************************)
+
+(*let klGamma ?a:(a=1.) x y =*)
+  (*let eps = 1e-15*)
+  (*in let x = max x eps*)
+  (*and y = max y eps*)
+  (*in a. *. ((x /. y) -. 1 -. log (x /. y))*)
+
+(*let klGauss ?sig2:(a=1.) x y =*)
+  (*(x -. y) *. (x -. y) /. (2 *. sig2)*)
+
+(*let klucb ?precision:(precision=1e-6) x d div upperbound lowerbound=*)
+  (*let l = ref (max x lowerbound)*)
+  (*and u = ref upperbound*)
+  (*and m = ref 0.*)
+  (*in (while !u -. !l > precision do*)
+        (*m := (!l +. !u)/2;*)
+        (*if (div x !m) > !d then*)
+          (*u := !m*)
+        (*else*)
+          (*l := !m*)
+      (*done;*)
+      (*(l +. u) /. 2.)*)
+
+
+let klucbGauss x d =
+    x +. (sqrt (2. *. d))
+
+module type HorizonKLUCBParam = sig
+  val k : int
+  val n : int
+  val c : float
+end
+
+module MakeHorizonKLUCB (P : HorizonKLUCBParam) : Bandit with type bandit = banditEstimates = struct
+  type bandit = banditEstimates
+  let initialBandit = initialBanditEstimates P.k
+  let f (b:banditEstimates) i =
+    let ti = float_of_int (List.nth b.nVisits i)
+    and t = float_of_int b.t
+    in klucbGauss (List.nth b.u i /. ti) (P.c *. (log t) /. ti)
+  let step (b:banditEstimates) x =
+    let a = if b.t < P.k then b.t else getA P.k (f b)
+    in a,
+       {t = b.t+1;
+        a = a;
+        nVisits = if b.a>=0 then incList b.a b.nVisits else b.nVisits;
+        u = if b.a>=0 then BatList.modify_at b.a (fun ui -> ui +. x) b.u else b.u}
+end
 
 (*******************************DOUBLING TRICK*************************)
 

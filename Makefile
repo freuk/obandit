@@ -1,3 +1,9 @@
+all:build
+
+.PHONY: build
+build:
+	topkg build
+
 .PHONY: doc
 doc:
 	nix-shell --run "topkg doc --docflags='-g odoc_custom.cma'"

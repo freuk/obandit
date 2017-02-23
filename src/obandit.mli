@@ -304,8 +304,27 @@ module type HorizonExp3Param = sig
 (** The $ n $ parameter, the horizon to optimize for.*)
 end
 
-(** The Exp3 Bandit for adversarial regret minimization with a decaying learning rate as per [[1]].*)
+(** The Exp3 Bandit for adversarial regret minimization with a horizon-based learning rate as per [[1]].*)
 module MakeHorizonExp3 (P : HorizonExp3Param) : Bandit with type bandit = banditPolicy
+
+
+(** {3:mdf MakeKLUCB: KL-UCB with a known horizon [[6]].}
+  * TODO: Document.
+  *)
+
+(** Use to instanciate a [Bandit] from [MakeHorizonKLUCB] .*)
+module type HorizonKLUCBParam = sig
+  val k : int
+  (** The number of actions $K$ .*)
+  val n : int 
+(** The $ n $ parameter, the horizon to optimize for.*)
+  val c : float
+(** The $ c $ parameter.*)
+end
+
+(** The horizon-based KL-UCB Bandit for stochastic regret minimization [[6]].*)
+module MakeHorizonKLUCB (P : HorizonKLUCBParam) : Bandit with type bandit = banditEstimates
+
 
 (**
   {2:mdf More Functors: The doubling trick.}
@@ -373,6 +392,10 @@ module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit
   [[5]] {{:homes.di.unimi.it/~cesabian/Pubblicazioni/ml-02.pdf}Finite-time
   Analysis of the Multiarmed Bandit Problem},
   Peter Auer, Nicolo Cesa-Bianchi, Paul Fischer
+
+  [[6]] {{:https://arxiv.org/abs/1102.2490}The KL-UCB Algorithm for Bounded 
+  Stochastic Bandits and Beyond},
+  Aurélien Garivier, Olivier Cappé
   *)
 
 (*---------------------------------------------------------------------------
