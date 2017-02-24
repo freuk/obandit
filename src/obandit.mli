@@ -352,21 +352,32 @@ module type RangeParam = sig
   (** The lower value of the range*)
 end
 
+(** A ranged action: Action a in normal course of action, Reset a in case
+* the bandit was just restarted. *)
+type rangedAction = Reset of int | Action of int
+
 (** The type of a bandit with a range.*)
 type 'b rangedBandit = {bandit:'b; (**The original type of the bandit.*)
                         u:float; (**The upper reward bound.*)
                         l:float  (**The lower reward bound.*)}
+
+(** The type of a bandit with reward scaling.*)
+module type RangedBandit = sig
+  type bandit
+  val initialBandit : bandit rangedBandit
+  val step : bandit rangedBandit -> float -> rangedAction * (bandit rangedBandit)
+end
 
 (** The WrapRange functor wraps a bandit algorithm with the doubling trick.
   This heuristic allows to use a bandit algorithm without knowing the reward
   ranges. All rewards are linearly rescaled to a range (initially given by a RangeParam).
   When a value is observed above the range, the bandit algorithm is restarted
   and the range interval is doubled in that direction.  *)
-module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit
+module WrapRange (R:RangeParam) (B:Bandit) : RangedBandit with type bandit = B.bandit
 
 (** The WrapRange01 functor is a convenience aliasing of WrapRange with an
   initial "standard" range of $ \left\[ 0,1 \right\] $.  *)
-module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit
+module WrapRange01 (B:Bandit) : RangedBandit with type bandit = B.bandit
 
 (**
   {1:ex Examples}

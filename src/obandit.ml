@@ -261,28 +261,36 @@ type 'b rangedBandit = {bandit:'b;
                         u:float;
                         l:float}
 
-module WrapRange (R:RangeParam) (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit = struct
-  type bandit = B.bandit rangedBandit
+type rangedAction = Reset of int | Action of int
+
+module type RangedBandit = sig
+  type bandit
+  val initialBandit : bandit rangedBandit
+  val step : bandit rangedBandit -> float -> rangedAction * (bandit rangedBandit)
+end
+
+module WrapRange (R:RangeParam) (B:Bandit) : RangedBandit with type bandit = B.bandit = struct
+  type bandit = B.bandit
   let initialBandit = {bandit=B.initialBandit;
                        u=R.upper;
                        l=R.lower}
   let step b x =
     if x>b.u then
-      let u' = b.l +. ((b.u -. b.l) *. 2.0)
+      let u' = b.l +. ((x -. b.l) *. 2.0)
       in let a,b' = B.step B.initialBandit ((x -. b.l) /. (u' -. b.l))
-      in (a,{b with bandit=B.initialBandit;
+      in (Reset a,{b with bandit=b';
                     u=u'})
       else if x<b.l then
-        let l' = b.u -. ((b.u -. b.l) *. 2.0)
+        let l' = b.u -. ((b.u -. x) *. 2.0)
         in let a,b' = B.step B.initialBandit ((x -. l') /. (b.u -. l'))
-        in (a,{b with bandit=B.initialBandit;
+        in (Reset a,{b with bandit=b';
                       l=l'})
         else
           let a,b' = B.step b.bandit  ((x -. b.l) /. (b.u -. b.l))
-          in (a,{b with bandit=b'})
+          in (Action a,{b with bandit=b'})
 end
 
-module WrapRange01 (B:Bandit) : Bandit with type bandit = B.bandit rangedBandit =
+module WrapRange01 (B:Bandit) : RangedBandit with type bandit = B.bandit =
   WrapRange(struct let upper=1. let lower=0. end)(B)
 (*---------------------------------------------------------------------------
  Copyright (c) 2017 Valentin Reis
