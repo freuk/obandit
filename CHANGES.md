@@ -1,3 +1,10 @@
+v0.2.1 2017-03-23 Grenoble
+--------------------------
+
+* Improve the doubling trick. If the observed value is larger than twice
+  the range, we should do more than double the window.
+* Documentation Fixes and use of Mathjax.
+
 v0.2 2017-02-17 Grenoble
 --------------------------
 
