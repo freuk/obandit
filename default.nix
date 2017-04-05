@@ -1,15 +1,9 @@
 with import <nixpkgs> {};
-{
-  topkgEnv = stdenv.mkDerivation {
-    name = "baseOcaml";
-    buildInputs =
-    [ bzip2
-    gmp
-    (texlive.combine {
-    inherit (texlive) cases scheme-small;
-    })
-  ];
-    TOPKG_DELEGATE=''./ocaml_delegate.ml'';
-    shellHook = '' export PS1="topkg-prompt> " '';
+let
+  callPackage = pkgs.lib.callPackageWith (pkgs // pkgs.xlibs // self);
+  #ocamlCallPackage = pkgs.ocamlPackages.callPackageWith (pkgs // pkgs.xlibs // self);
+  self = rec {
+    obandit = pkgs.ocamlPackages.callPackage ./obandit.nix { };
   };
-}
+in
+  self
