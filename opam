@@ -4,8 +4,8 @@ authors: ["Valentin Reis <fre@freux.fr>"]
 homepage: "http://freux.fr/obandit"
 doc: "http://freux.fr/obandit/doc"
 license: "ISC"
-dev-repo: "http://git.freux.fr/cgit/obandit.git"
-bug-reports: "ocaml@freux.fr"
+dev-repo: "https://github.com/freuk/obandit"
+bug-reports: "https://github.com/freuk/obandit/issues"
 tags: []
 available: [ ocaml-version >= "4.01.0"]
 depends: [
