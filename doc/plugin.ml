@@ -57,7 +57,7 @@ struct
       inherit G.html as super
 
       method prepare_header module_list =
-        print_endline "*** odoc_custom.ml is called.";
+        print_endline "*** Using mathjax custom ocamldoc generator.";
         super#prepare_header module_list; (* destructively modifies [header] *)
         header <- add_mathjax_to_header header
 
