@@ -1,3 +1,10 @@
+v0.2.2 2017-04-12 Grenoble
+--------------------------
+
+* Change opam file to point to github issues and pages.
+* Add custom rule for building the documentation with mathjax
+as ocamlbuild plugin.
+
 v0.2.1 2017-03-23 Grenoble
 --------------------------
 
