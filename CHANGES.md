@@ -1,4 +1,4 @@
-v0.2.2 2017-04-12 Grenoble
+v0.2.3 2017-04-12 Grenoble
 --------------------------
 
 * Change opam file to point to github issues and pages.
