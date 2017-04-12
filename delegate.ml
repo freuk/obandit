@@ -74,6 +74,8 @@ let repo_and_owner_of_uri uri =
             field value %a; expected the pattern \
             $SCHEME://$HOST/$OWNER/$REPO[.$EXT][/$DIR]" String.dump uri
   in
+    begin
+      Printf.printf "%s\n" uri;
   match Topkg_care.Text.split_uri ~rel:true uri with
   | None -> Error (uri_error uri)
   | Some (_, _, path) ->
@@ -90,6 +92,7 @@ let repo_and_owner_of_uri uri =
             >>= fun repo -> Ok (owner, Fpath.(to_string @@ rem_ext repo))
           end
           |> R.reword_error_msg (fun _ -> uri_error uri)
+    end
 
 let steal_opam_publish_github_auth () =
   let opam = Cmd.(v "opam") in
@@ -168,8 +171,11 @@ let curl_create_release curl version msg owner repo =
   let uri = strf "https://api.github.com/repos/%s/%s/releases" owner repo in
   let auth = github_auth ~owner in
   let cmd = Cmd.(curl % "-D" % "-" % "--data" % data % uri) in
-  run_with_auth auth cmd |> OS.Cmd.to_string ~trim:false
-  >>= parse_release_id
+    begin
+      Printf.printf "\n\n\n%s %s\n\n\n" owner repo;
+      run_with_auth auth cmd |> OS.Cmd.to_string ~trim:false
+      >>= parse_release_id
+    end
 
 let curl_upload_archive curl archive owner repo release_id =
   let uri =
