@@ -22,4 +22,4 @@ instructions.
 ## Documentation
 
 The documentation and API reference is generated from the source
-interfaces. It can be consulted [online][doc].
+interfaces. It can be consulted [online](https://freuk.github.io/obandit/api.docdir/index.html).
