@@ -1,3 +1,8 @@
+v0.2.3.2 2017-04-13 Grenoble
+--------------------------
+
+* fix delegate to use github based documentation.
+
 v0.2.3.1 2017-04-13 Grenoble
 --------------------------
 
