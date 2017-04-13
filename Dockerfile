@@ -8,4 +8,5 @@ RUN sudo apt-get install vim -y
 ENV EDITOR vim
 ENV TOPKG_DELEGATE ./delegate.ml
 CMD rm -rf /home/opam/.ssh
+WORKDIR /home/opam/pkg
 CMD /bin/bash

@@ -3,6 +3,12 @@
 #require "bos.setup"
 #require "topkg"
 #require "topkg.care"
+(*---------------------------------------------------------------------------
+   Copyright (c) 2016 Daniel C. Bünzli. All rights reserved.
+   Distributed under the ISC license, see terms at the end of the file.
+   %%NAME%% %%VERSION%%
+  ---------------------------------------------------------------------------*)
+
 
 open Bos_setup
 
@@ -168,8 +174,8 @@ let curl_create_release curl version msg owner repo =
   let uri = strf "https://api.github.com/repos/%s/%s/releases" owner repo in
   let auth = github_auth ~owner in
   let cmd = Cmd.(curl % "-D" % "-" % "--data" % data % uri) in
-      run_with_auth auth cmd |> OS.Cmd.to_string ~trim:false
-      >>= parse_release_id
+  run_with_auth auth cmd |> OS.Cmd.to_string ~trim:false
+  >>= parse_release_id
 
 let curl_upload_archive curl archive owner repo release_id =
   let uri =
@@ -202,7 +208,7 @@ let unsupported = Ok 1
 
 let publish = function
 | "distrib" :: uri :: name :: version :: msg :: archive :: _ ->
-    publish_distrib "http://github.com/freuk/obandit" name version msg archive
+    publish_distrib uri name version msg archive
 | "doc" :: uri :: name :: version :: msg :: docdir :: _ ->
     publish_doc_gh_pages uri name version docdir
 | "alt" :: kind :: uri :: name :: version :: msg :: archive :: _ ->
