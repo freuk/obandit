@@ -3,7 +3,7 @@ docker-build:
 	docker build -t ocaml-obandit .
 
 docker-run:
-	docker run -v	`pwd`:/home/opam/pkg -itd --name=obandit ocaml-obandit /bin/bash
+	docker run --volume=`pwd`:/home/opam/pkg -itd --name=obandit ocaml-obandit /bin/bash
 	docker attach obandit
 
 docker-clean:

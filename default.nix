@@ -4,6 +4,5 @@ let
   #ocamlCallPackage = pkgs.ocamlPackages.callPackageWith (pkgs // pkgs.xlibs // self);
   self = rec {
     obandit = pkgs.ocamlPackages.callPackage ./obandit.nix { };
-  };
-in
+n
   self

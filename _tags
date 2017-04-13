@@ -4,3 +4,6 @@ true : package(batteries)
 
 <src> : include
 <test> : include
+
+<doc/*.docdir>: plugin(doc/plugin.cma)
+<doc/*plugin*>: package(ocamldoc)

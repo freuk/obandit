@@ -8,8 +8,6 @@
 
   {e Version 0.2 — {{:http://freux.fr/obandit }homepage}} 
 
-  See online version for mathjax-enabled documentation.
-
   {1:mutband Bandit Modules}
 
   This library implements multi-armed bandits as modules.
