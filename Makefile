@@ -4,6 +4,8 @@ docker-build:
 
 docker-run:
 	docker run --volume=`pwd`:/home/opam/pkg -itd --name=obandit ocaml-obandit /bin/bash
+	docker cp ~/.ssh obandit:/home/opam/
+	docker exec -d obandit sudo chown -R opam:opam /home/opam/.ssh
 	docker attach obandit
 
 docker-clean:

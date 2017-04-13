@@ -9,37 +9,12 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-
 open Bos_setup
 
 (* Publish documentation *)
 
-let repo_docdir_owner_repo_and_path_from_doc_uri uri =
-  (* Parses the $PATH of $SCHEME://$HOST/$REPO/$PATH *)
-  let uri_error uri =
-    R.msgf "Could not derive publication directory $PATH from opam doc \
-            field value %a; expected the pattern \
-            $SCHEME://$OWNER.github.io/$REPO/$PATH" String.dump uri
-  in
-  match Topkg_care.Text.split_uri ~rel:true uri with
-  | None -> Error (uri_error uri)
-  | Some (_, host, path) ->
-      if path = "" then Error (uri_error uri) else
-      (match String.cut ~sep:"." host with
-      | Some (owner, g) when String.equal g "github.io" -> Ok owner
-      | _ -> Error (uri_error uri))
-      >>= fun owner ->
-      match String.cut ~sep:"/" path with
-      | None -> Error (uri_error uri)
-      | Some (repo, "") -> Ok (owner, repo, Fpath.v ".")
-      | Some (repo, path) ->
-          (Fpath.of_string path >>| fun p -> owner, repo, Fpath.rem_empty_seg p)
-          |> R.reword_error_msg (fun _ -> uri_error uri)
 
-let publish_doc_gh_pages uri name version docdir =
-  Fpath.of_string docdir
-  >>= fun docdir -> repo_docdir_owner_repo_and_path_from_doc_uri uri
-  >>= fun (owner, repo, dir) ->
+let publish_doc_gh_pages owner repo dir name version docdir =
   let remote = strf "https://github.com/%s/%s.git" owner repo in
   let git_for_repo r = Cmd.of_list (Topkg.Cmd.to_list @@ Topkg.Vcs.cmd r) in
   let create_empty_gh_pages git =
@@ -321,7 +296,6 @@ let main_cmd =
   Term.(ret (const main_cmd $ const ())),
   Term.info "toy-github-topkg-delegate" ~version ~doc ~envs ~man ~man_xrefs
 
-
 let main () =
   Topkg.Private.disable_main ();
   match Term.eval_choice main_cmd [ipc_cmd] with
@@ -330,19 +304,3 @@ let main () =
   | _ -> exit 0
 
 let () = main ()
-
-(*---------------------------------------------------------------------------
-   Copyright (c) 2016 Daniel C. Bünzli
-
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
-
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-  ---------------------------------------------------------------------------*)
