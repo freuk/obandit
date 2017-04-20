@@ -10,7 +10,7 @@ EXP3, UCB1 and Epsilon-greedy algorithms.
 
 Obandit is distributed under the ISC license.
 
-Homepage: http://freux.fr/obandit  
+Homepage: http://freux.fr/oss/obandit.html
 
 ## Installation
 
