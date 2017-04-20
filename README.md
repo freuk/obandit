@@ -3,7 +3,9 @@ Obandit — Ocaml Multi-Armed Bandits
 
 [![DOI](https://zenodo.org/badge/81206527.svg)](https://zenodo.org/badge/latestdoi/81206527)
 ![release](https://img.shields.io/github/downloads/freuk/obandit/latest/total.svg)
-![commits](https://img.shields.io/github/commits-since/freuk/obandit/total.svg)
+![commits](https://img.shields.io/github/commits-since/freuk/obandit/v0.2.3.1-5-g40e1b6c.svg)
+![web](https://img.shields.io/website-up-down-green-red/http/freux.fr.svg)
+![tag](https://img.shields.io/github/tag/freuk/obandit.svg)
 
 Obandit is an OCaml module for basic multi-armed bandits. It supports the
 EXP3, UCB1 and Epsilon-greedy algorithms.
