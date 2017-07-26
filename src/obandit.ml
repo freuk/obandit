@@ -1,8 +1,8 @@
 (*---------------------------------------------------------------------------
- Copyright (c) 2017 Valentin Reis. All rights reserved.
- Distributed under the ISC license, see terms at the end of the file.
- %%NAME%% %%VERSION%%
- ---------------------------------------------------------------------------*)
+  Copyright (c) 2017 Valentin Reis. All rights reserved.
+  Distributed under the ISC license, see terms at the end of the file.
+  %%NAME%% %%VERSION%%
+  ---------------------------------------------------------------------------*)
 
 module type Bandit = sig
   type bandit
@@ -90,7 +90,7 @@ let sample p =
   let r = Random.float (BatList.fsum p)
   in let rec sample i acc = function
     |p::ps -> let ap = acc +. p
-     in if (ap > r) then i+1 else sample (i+1) ap ps
+        in if (ap > r) then i+1 else sample (i+1) ap ps
     |[] -> i+1
   in sample (-1) 0. p
 
@@ -115,15 +115,15 @@ end
 
 module MakeAlphaUCB (P : AlphaUCBParam) : Bandit with type bandit = banditEstimates =
   MakeAlphaPhiUCB(struct
-                    include P
-                    let invLFPhi x = sqrt (x /. 2.)
-                  end)
+    include P
+    let invLFPhi x = sqrt (x /. 2.)
+  end)
 
 module MakeUCB1 (P : KBanditParam) : Bandit with type bandit = banditEstimates =
   MakeAlphaUCB(struct
-                 include P
-                 let alpha=4.
-               end)
+    include P
+    let alpha=4.
+  end)
 
 (**************************** EPSILON GREEDY *******************************)
 
@@ -136,10 +136,10 @@ struct
 
   let step (b:banditEstimates) x =
     let a = if b.t < P.k
-    then b.t
-    else if Random.float 1. < (P.rate b.t) then
-      getA P.k (f b)
-    else
+      then b.t
+      else if Random.float 1. < (P.rate b.t) then
+        getA P.k (f b)
+      else
       Random.int P.k
     in a,
        {t=b.t+1;
@@ -150,15 +150,15 @@ end
 
 module MakeDecayingEpsilonGreedy (P : DecayingEpsilonGreedyParam) : Bandit with type bandit = banditEstimates  =
   MakeParametrizableEpsilonGreedy(struct
-                                    include P
-                                    let rate t = min 1. ((c *. (float_of_int P.k)) /.( P.d *. P.d *. float_of_int t))
-                                  end)
+    include P
+    let rate t = min 1. ((c *. (float_of_int P.k)) /.( P.d *. P.d *. float_of_int t))
+  end)
 
 module MakeEpsilonGreedy (P : EpsilonGreedyParam) : Bandit with type bandit = banditEstimates =
   MakeParametrizableEpsilonGreedy(struct
-                                    include P
-                                    let rate _ = P.epsilon
-                                  end)
+    include P
+    let rate _ = P.epsilon
+  end)
 
 (********************************* EXP3 **********************************)
 
@@ -177,10 +177,10 @@ struct
       if b.a < 0
       then Random.int P.k,b.w
       else
-        let f wi = wi *. (exp ((P.rate b.t) *. x /. ((float_of_int P.k) *. (wToP (BatList.fsum b.w) b.t wi))))
-        in let w = BatList.modify_at b.a f b.w;
-        in let p = List.map (wToP (BatList.fsum w) b.t) w
-        in (sample p,w)
+      let f wi = wi *. (exp ((P.rate b.t) *. x /. ((float_of_int P.k) *. (wToP (BatList.fsum b.w) b.t wi))))
+      in let w = BatList.modify_at b.a f b.w;
+      in let p = List.map (wToP (BatList.fsum w) b.t) w
+      in (sample p,w)
     in a,
        {t = b.t+1;
         a = a;
@@ -189,21 +189,21 @@ end
 
 module MakeDecayingExp3 (P : KBanditParam) : Bandit with type bandit = banditPolicy =
   MakeExp3(struct
-             include P
-             let rate t = sqrt ( log (float_of_int P.k) /. (float_of_int (t * P.k)))
-           end)
+    include P
+    let rate t = sqrt ( log (float_of_int P.k) /. (float_of_int (t * P.k)))
+  end)
 
 module MakeFixedExp3 (P : FixedExp3Param) : Bandit with type bandit = banditPolicy =
   MakeExp3(struct
-             include P
-             let rate _ = P.eta
-           end)
+    include P
+    let rate _ = P.eta
+  end)
 
 module MakeHorizonExp3 (P : HorizonExp3Param) : Bandit with type bandit = banditPolicy =
   MakeExp3(struct
-             include P
-             let rate _ = sqrt (2. *. (log (float_of_int P.k)) /. (float_of_int (P.n * P.k)))
-           end)
+    include P
+    let rate _ = sqrt (2. *. (log (float_of_int P.k)) /. (float_of_int (P.n * P.k)))
+  end)
 
 (*******************************DOUBLING TRICK*************************)
 
@@ -228,32 +228,30 @@ module WrapRange (R:RangeParam) (B:Bandit) : RangedBandit with type bandit = B.b
     if x>b.u then
       let u' = b.l +. ((x -. b.l) *. 2.0)
       in let a,b' = B.step B.initialBandit ((x -. b.l) /. (u' -. b.l))
-      in (Reset a,{b with bandit=b';
-                    u=u'})
-      else if x<b.l then
-        let l' = b.u -. ((b.u -. x) *. 2.0)
-        in let a,b' = B.step B.initialBandit ((x -. l') /. (b.u -. l'))
-        in (Reset a,{b with bandit=b';
-                      l=l'})
-        else
-          let a,b' = B.step b.bandit  ((x -. b.l) /. (b.u -. b.l))
-          in (Action a,{b with bandit=b'})
+      in (Reset a,{b with bandit=b'; u=u'})
+    else if x<b.l then
+      let l' = b.u -. ((b.u -. x) *. 2.0)
+      in let a,b' = B.step B.initialBandit ((x -. l') /. (b.u -. l'))
+      in (Reset a,{b with bandit=b'; l=l'})
+    else
+    let a,b' = B.step b.bandit  ((x -. b.l) /. (b.u -. b.l))
+    in (Action a,{b with bandit=b'})
 end
 
 module WrapRange01 (B:Bandit) : RangedBandit with type bandit = B.bandit =
   WrapRange(struct let upper=1. let lower=0. end)(B)
 (*---------------------------------------------------------------------------
- Copyright (c) 2017 Valentin Reis
+  Copyright (c) 2017 Valentin Reis
 
- Permission to use, copy, modify, and/or distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- ---------------------------------------------------------------------------*)
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  ---------------------------------------------------------------------------*)
