@@ -1,0 +1,17 @@
+# obandit
+
+doc: [
+  "_build/CHANGES.md" {"CHANGES.md"}
+  "_build/LICENSE.md" {"LICENSE.md"}
+  "_build/README.md" {"README.md"} ]
+lib: [
+  "_build/opam" {"opam"}
+  "_build/pkg/META" {"META"}
+  "_build/src/obandit.a" {"obandit.a"}
+  "_build/src/obandit.cma" {"obandit.cma"}
+  "_build/src/obandit.cmi" {"obandit.cmi"}
+  "?_build/src/obandit.cmti" {"obandit.cmti"}
+  "_build/src/obandit.cmx" {"obandit.cmx"}
+  "_build/src/obandit.cmxa" {"obandit.cmxa"}
+  "_build/src/obandit.cmxs" {"obandit.cmxs"}
+  "_build/src/obandit.mli" {"obandit.mli"} ]
