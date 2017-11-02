@@ -5,8 +5,13 @@
  ---------------------------------------------------------------------------*)
 
 (**  Ocaml Multi-Armed Bandits
+  
+  
+Obandit is an OCaml module for multi-armed bandits. It supports the
+EXP, UCB and Epsilon-greedy family of algorithms.
 
-  {e Version 0.2 — {{:http://freux.fr/obandit }homepage}} 
+  {e Version 0.2 — {{:http://freux.fr/oss/obandit.html }homepage}} 
+  {%html: <img src="http://freux.fr/kroliki.jpg" alt="rabbits" width="600"> %} 
 
   {1:mutband Bandit Modules}
 
