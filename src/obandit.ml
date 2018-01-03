@@ -138,9 +138,9 @@ struct
     let a = if b.t < P.k
       then b.t
       else if Random.float 1. < (P.rate b.t) then
-        getA P.k (f b)
+        Random.int P.k
       else
-      Random.int P.k
+        getA P.k (f b)
     in a,
        {t=b.t+1;
         a=a;
