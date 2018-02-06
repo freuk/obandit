@@ -90,8 +90,8 @@ let sample p =
   let r = Random.float (BatList.fsum p)
   in let rec sample i acc = function
     |p::ps -> let ap = acc +. p
-        in if (ap > r) then i+1 else sample (i+1) ap ps
-    |[] -> i+1
+        in if (r <= ap) then i+1 else sample (i+1) ap ps
+    |[] -> i
   in sample (-1) 0. p
 
 (**************************** UCB *******************************)
