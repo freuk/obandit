@@ -11,7 +11,10 @@ stdenv.mkDerivation rec {
 
 	unpackCmd = "tar xjf $src";
 
-	buildInputs = [ ocaml findlib ocamlbuild topkg opam ocamlPackages.ocaml_batteries];
+  buildInputs = [ ocaml findlib ocamlbuild topkg opam 
+  ocamlPackages.ocaml_batteries
+  ocamlPackages.cmdliner
+  ];
 
   propagatedBuildInputs = [  ];
 

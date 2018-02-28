@@ -8,5 +8,5 @@ let () =
     ~distrib:(Pkg.distrib ()) "obandit"
   @@ fun c ->
     Ok [ Pkg.mllib "src/obandit.mllib";
-         Pkg.test "test/test"; ]
-
+         Pkg.bin "src-bin/cli" ~dst:"obandit";
+       ]
