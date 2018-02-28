@@ -1,8 +1,9 @@
-{ stdenv, fetchurl, ocaml, findlib, ocamlbuild, opam, ocaml_batteries, topkg }:
+{ stdenv, fetchurl, ocaml, findlib, ocamlbuild, opam, ocamlPackages, topkg }:
 
 stdenv.mkDerivation rec {
 	name = "obandit-${version}";
-	version = "0.2.1";
+	version = "1.2.1";
+
 	src = fetchurl {
 		url = "https://github.com/freuk/obandit/archive/v0.2.1-zenodo.tar.gz";
 		sha256 = "1a8l4kvv811vy11gjj9nvz1px7s4zxrr3zi53zblvkibq56zzl7s";
@@ -10,9 +11,9 @@ stdenv.mkDerivation rec {
 
 	unpackCmd = "tar xjf $src";
 
-	buildInputs = [ ocaml findlib ocamlbuild topkg opam ];
+	buildInputs = [ ocaml findlib ocamlbuild topkg opam ocamlPackages.ocaml_batteries];
 
-  propagatedBuildInputs = [ ocaml_batteries ];
+  propagatedBuildInputs = [  ];
 
 	inherit (topkg) buildPhase installPhase;
 
