@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation rec {
 	name = "obandit-${version}";
-	version = "1.2.1";
+	version = "0.2.1";
 
 	src = fetchurl {
 		url = "https://github.com/freuk/obandit/archive/v0.2.1-zenodo.tar.gz";
