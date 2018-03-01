@@ -60,7 +60,7 @@ let csv_cmd =
   in let doc = "Apply the bandit algorithm on a csv file."
   in let f_out =
     let doc = "Output csv." in
-      Arg.(required & pos 1 (some file) None & info [] ~docv:"OUT" ~docs ~doc)
+      Arg.(required & pos 1 (some string) None & info [] ~docv:"OUT" ~docs ~doc)
   in let doc = "Apply the bandit algorithm on a csv file."
   in let k  =
     let doc = "Arm count." in
