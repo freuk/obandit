@@ -5,7 +5,7 @@
  ---------------------------------------------------------------------------*)
 
 open Obanditcsv
-open Cmdliner 
+open Cmdliner
 
 type copts = {
   debug : bool}
@@ -65,12 +65,18 @@ let csv_cmd =
   in let k  =
     let doc = "Arm count." in
       Arg.(required & pos 2 (some int) None & info [] ~docv:"K" ~docs ~doc)
+  in let rate =
+    let doc = "Rate." in
+      Arg.(required & pos 3 (some float) None & info [] ~docv:"IN" ~docs ~doc)
+  in let bandit =
+    let doc = "Bandit type." in
+      Arg.(required & pos 4 (some (enum Obanditcsv.bandits)) None & info [] ~docv:"IN" ~docs ~doc)
   in let doc = "Apply the bandit algorithm on a csv file."
   in let man =
   [`S "DESCRIPTION";
    `P doc] @ help_secs
   in
-    Term.(const Obanditcsv.csv $ f_in $ f_out $ k ),
+    Term.(const Obanditcsv.csv $ f_in $ f_out $ k $ rate $ bandit),
     Term.info "csv" ~doc ~sdocs:docs ~man
 
 let cmds = [csv_cmd;]
