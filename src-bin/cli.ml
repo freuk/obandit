@@ -70,7 +70,7 @@ let csv_cmd =
       Arg.(required & pos 3 (some float) None & info [] ~docv:"RATE" ~docs ~doc)
   in let bandit =
     let doc = "Bandit type." in
-      Arg.(required & pos 4 (some (enum Obanditcsv.bandits)) None & info [] ~docv:"IN" ~docs ~doc)
+      Arg.(required & pos 4 (some (enum Obanditcsv.bandits)) None & info [] ~docv:"BANDIT" ~docs ~doc)
   in let doc = "Apply the bandit algorithm on a csv file."
   in let man =
   [`S "DESCRIPTION";
