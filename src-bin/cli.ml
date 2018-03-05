@@ -67,7 +67,7 @@ let csv_cmd =
       Arg.(required & pos 2 (some int) None & info [] ~docv:"K" ~docs ~doc)
   in let rate =
     let doc = "Rate." in
-      Arg.(required & pos 3 (some float) None & info [] ~docv:"IN" ~docs ~doc)
+      Arg.(required & pos 3 (some float) None & info [] ~docv:"RATE" ~docs ~doc)
   in let bandit =
     let doc = "Bandit type." in
       Arg.(required & pos 4 (some (enum Obanditcsv.bandits)) None & info [] ~docv:"IN" ~docs ~doc)
