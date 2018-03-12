@@ -1,0 +1,31 @@
+#arms
+k = 8
+
+isamples = $(range 1 30)
+
+policies = exp3 ucb1 expgreedy
+
+#repeats
+n = 3000
+
+rate = 0.1
+
+rstudo 0 ./generate.R $(i) $(k) $(n) $(> data="bernouilli").csv
+
+obandit csv $(<).csv $(>).actions $(k) $(rate) $(policy)
+
+printf "$(data)-$(policy) \n$(<i=*is).csv " > $(>).list_csv
+
+printf "$(data)-$(policy) \n$(<i=*is).actions " > $(>).list_actions
+
+printf "$(policy)\n  $(<).list_csv \n $(<).list_actions " > $(>).item_policy
+
+printf " \n$(< policy=*policies).item_policy " > $(>).list_policies
+
+rstudo 1 ./analyze.R $(<).list_policies $(>).md
+
+pandoc -o $(>).html -s $(<).md
+
+echo "
+$( data="bernouilli" is=isamples ).html
+"

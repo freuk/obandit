@@ -1,5 +1,5 @@
 { stdenv, fetchurl, ocaml, findlib, ocamlbuild, result, opam ,topkg,
-fmt,logs,bos,cmdliner,webbrowser}:
+fmt,logs,bos,cmdliner}:
 
 
 stdenv.mkDerivation rec {
