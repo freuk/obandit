@@ -1,6 +1,7 @@
 true : bin_annot, safe_string, package(bytes)
 
 true : package(batteries)
+true : package(cmdliner)
 
 <src> : include
 <test> : include

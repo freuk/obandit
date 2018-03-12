@@ -10,9 +10,10 @@ stdenv.mkDerivation rec {
 	};
 	#unpackCmd = "tar xjf $src";
 
-  buildInputs = [ ocaml findlib ocamlbuild topkg opam ocamlPackages.ocaml_batteries ];
-
-	inherit (topkg) buildPhase;
+  buildInputs = [ ocaml findlib ocamlbuild topkg opam
+  ocamlPackages.ocaml_batteries
+  ocamlPackages.cmdliner
+  ];
 
   patchPhase=''
     substituteInPlace src/obandit.mli --replace %%VERSION%% ${version}
