@@ -3,7 +3,7 @@
 The source for this experimental validation can be found
 in the obandit [repository](https://github.com/freuk/obandit).
 
-The workflow file is:
+The [zymake](http://www-personal.umich.edu/~ebreck/code/zymake/) workflow file is:
 ```{bash, echo=FALSE}
 cat ./zymakefile
 ```

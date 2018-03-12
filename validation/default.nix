@@ -65,6 +65,8 @@ in stdenv.mkDerivation {
     cp o/zymakefile/*.md $out
     cp -r figure $out
     cp o/zymakefile/*.html $out
+    obandit --help > $out/cli.txt
+    obandit csv --help > $out/cli_csv.txt
   '';
 
   obanditversion=obandit.version;
