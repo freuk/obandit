@@ -1,10 +1,12 @@
+# [Obandit](http://freux.fr/oss/obandit.html) experimental validation for version `r Sys.getenv('obanditversion')`
 
-# Obandit report.
-This testsuite/report validates the [Obandit](http://freux.fr/oss/obandit.html) library.
-The code for this test suite is hosted at Github in the [Obandit-tooling](https://github.com/freuk/obandit-tooling) repository.
-This report is generated using commit:
+The source for this experimental validation can be found
+in the obandit [repository](https://github.com/freuk/obandit).
 
-##obandit `r as.character(Sys.getenv('obanditcommit'))`
+The workflow file is:
+```{bash, echo=FALSE}
+cat ./zymakefile
+```
 
 ```{r, echo=TRUE}
 theme_set(theme_minimal())
@@ -64,7 +66,7 @@ print(summary(data))
 ```
 
 ### Performance of various algorithms.
-In terms of regret to best arm in hindsight:
+In terms of regret to best arm in hindsight, using exp3, ucb1 and fixed-exploration epsilon-greedy:
 
 ```{r,echo=TRUE , fig.cap="",dev="png",fig.width=14,fig.height=4}
   ggplot(data_reduced,aes(t,avgregret,color=policy))+

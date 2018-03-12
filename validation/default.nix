@@ -9,7 +9,6 @@ zymake,
 R,
 rPackages,
 obandit,
-obanditcommit,
 ...}:
 let
   rPackList= with rPackages; [
@@ -68,6 +67,6 @@ in stdenv.mkDerivation {
     cp o/zymakefile/*.html $out
   '';
 
-  inherit obanditcommit;
+  obanditversion=obandit.version;
 }
 

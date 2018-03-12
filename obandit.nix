@@ -15,6 +15,8 @@ stdenv.mkDerivation rec {
   ocamlPackages.cmdliner
   ];
 
+  inherit (topkg) buildPhase;
+
   patchPhase=''
     substituteInPlace src/obandit.mli --replace %%VERSION%% ${version}
   '';

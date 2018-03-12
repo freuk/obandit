@@ -4,22 +4,29 @@
 let
   self = rec {
     obandit_orig = pkgs.ocamlPackages.callPackage ./obandit.nix {};
-    obandit = obandit_orig.overrideAttrs (oldAttrs : { src = ./.; });
-    zymake = (import ./zymake {inherit pkgs;}).zymake;
 
-    commit_id = pkgs.runCommand "hash"
+    commit_id_hash = pkgs.runCommand "hash"
     { nativeBuildInputs = [ pkgs.git ]; preferLocalBuild = true; } ''
     mkdir $out
     git -C ${./.} rev-parse HEAD > $out/hash
     '';
+    commit=builtins.readFile "${commit_id_hash}/hash";
 
-    validation = pkgs.callPackage ./validation {
+    obandit = obandit_orig.overrideAttrs (oldAttrs : {
+      src = ./.;
+      version = "git-${commit}";
+    });
+    zymake = (import ./zymake {inherit pkgs;}).zymake;
+
+    validation = obandit: pkgs.callPackage ./validation {
       inherit zymake obandit;
-      obanditcommit=builtins.readFile "${commit_id}/hash";
+      obanditversion=obandit.version;
       rstudioWrapper=pkgs.rstudioWrapper.overrideAttrs (oldAttrs : {
         propagatedBuildInputs = with pkgs;[ qt5.full qt5.qtwebkit qt5.qtwebchannel ];
       });
     };
+
+    validation-local = validation obandit;
 
   };
 in
