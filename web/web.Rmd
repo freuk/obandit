@@ -7,10 +7,10 @@ Obandit-`r Sys.getenv('obanditversion')` ships with a helper binary.
 For now this binary only runs bandit strategies on csv files:
 
 
-```{bash}
+```{bash, comment=''}
 obandit --help
 ```
 
-```{bash}
+```{bash, comment=''}
 obandit csv --help
 ```

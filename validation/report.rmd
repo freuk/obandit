@@ -4,7 +4,7 @@ The source for this experimental validation can be found
 in the obandit [repository](https://github.com/freuk/obandit).
 
 The [zymake](http://www-personal.umich.edu/~ebreck/code/zymake/) workflow file is:
-```{bash, echo=FALSE}
+```{bash, echo=FALSE, comment=''}
 cat ./zymakefile
 ```
 
