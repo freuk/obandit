@@ -1,6 +1,9 @@
 .PHONY:all
 
-all:
+all: zmk
+
+.PHONY:zmk
+zmk:
 	zymake -l localhost zymakefile
 
 slow:

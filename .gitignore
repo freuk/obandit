@@ -7,3 +7,4 @@ tmp
 *.install
 *.native
 *.byte
+__nix_qt5__

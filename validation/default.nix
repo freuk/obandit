@@ -61,12 +61,12 @@ in stdenv.mkDerivation {
   ]++rPackList;
 
   installPhase =''
-    mkdir -p $out
-    cp o/zymakefile/*.md $out
-    cp -r figure $out
-    cp o/zymakefile/*.html $out
-    obandit --help > $out/cli.txt
-    obandit csv --help > $out/cli_csv.txt
+    mkdir -p $out/md
+    mkdir -p $out/html
+    cp o/zymakefile/*.md $out/md
+    cp o/zymakefile/*.html $out/html
+    cp -r figure $out/md
+    cp -r figure $out/html
   '';
 
   obanditversion=obandit.version;

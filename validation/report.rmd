@@ -1,4 +1,4 @@
-# [Obandit](http://freux.fr/oss/obandit.html) experimental validation for version `r Sys.getenv('obanditversion')`
+# [Obandit](http://freux.fr/oss/obandit.html)-`r Sys.getenv('obanditversion')` experimental validation.
 
 The source for this experimental validation can be found
 in the obandit [repository](https://github.com/freuk/obandit).

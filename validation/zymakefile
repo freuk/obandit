@@ -1,12 +1,12 @@
 #arms
 k = 8
 
-isamples = $(range 1 30)
+isamples = $(range 1 3)
 
 policies = exp3 ucb1 expgreedy
 
 #repeats
-n = 3000
+n = 30
 
 rate = 0.1
 
@@ -22,9 +22,9 @@ printf "$(policy)\n  $(<).list_csv \n $(<).list_actions " > $(>).item_policy
 
 printf " \n$(< policy=*policies).item_policy " > $(>).list_policies
 
-rstudo 1 ./analyze.R $(<).list_policies $(>).md
+rstudo 1 ./analyze.R $(<).list_policies $(> ).md
 
-pandoc -o $(>).html -s $(<).md
+pandoc -o $(>).html -s $(< ).md
 
 echo "
 $( data="bernouilli" is=isamples ).html

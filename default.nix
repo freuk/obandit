@@ -5,16 +5,16 @@ let
   self = rec {
     obandit_orig = pkgs.ocamlPackages.callPackage ./obandit.nix {};
 
-    commit_id_hash = pkgs.runCommand "hash"
-    { nativeBuildInputs = [ pkgs.git ]; preferLocalBuild = true; } ''
-    mkdir $out
-    git -C ${./.} rev-parse HEAD > $out/hash
-    '';
-    commit=builtins.readFile "${commit_id_hash}/hash";
+    #commit_id_hash = pkgs.runCommand "hash"
+    #{ nativeBuildInputs = [ pkgs.git ]; preferLocalBuild = true; } ''
+      #mkdir $out
+      #git -C ${./.} rev-parse HEAD > $out/hash
+    #'';
+    #commit=builtins.readFile "${commit_id_hash}/hash";
 
     obandit = obandit_orig.overrideAttrs (oldAttrs : {
       src = ./.;
-      version = "git-${commit}";
+      version = "git";
     });
     zymake = (import ./zymake {inherit pkgs;}).zymake;
 
@@ -27,6 +27,13 @@ let
     };
 
     validation-local = validation obandit;
+
+    web = obandit: pkgs.callPackage ./web {
+      inherit obandit;
+      validation = validation obandit;
+    };
+
+    web-local = web obandit;
 
   };
 in
