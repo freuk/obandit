@@ -63,59 +63,7 @@ read_policy <- function (f){
   data
 }
 
-run_metrics <- function (d) {
-  data.frame(
-            runtime=d$runtime_s[1],
-            class=d$class[1],
-            avg_mips=mean(d$period_avg_mips),
-            avg_progress=mean(d$hardwareprogress),
-            watthours=sum(d$period_joule)*onejoule,
-            avg_proxyloss=mean(d$period_proxyloss),
-            period_inv_avg_mips = d$period_inv_avg_mips,
-            avg_inv_avg_mips = mean(d$period_inv_avg_mips),
-            period_final_energy_estimate = d$period_final_energy_estimate,
-            avg_final_energy_estimate = mean(d$period_final_energy_estimate)
-            )
-}
-
-reduce_one_run_augment_data <- function (d) {
-  rm=run_metrics(d)
-  data.frame(
-            class=rm$class,
-            runtime=rm$runtime,
-            avg_mips=rm$avg_mips,
-            watthours=rm$watthours,
-            avg_proxyloss=rm$avg_proxyloss,
-            avg_progress=rm$avg_progress,
-            avg_final_energy_estimate = rm$avg_final_energy_estimate,
-            avg_inv_avg_mips = rm$avg_inv_avg_mips,
-            hardwareprogress=d$hardwareprogress,
-            progress=d$progress,
-            period_avg_power=d$period_avg_power,
-            period_avg_mips=d$period_avg_mips,
-            period_proxyloss=d$period_proxyloss,
-            period_inv_avg_mips = d$period_inv_avg_mips,
-            period_final_energy_estimate = d$period_final_energy_estimate
-            )
-}
-
 load_manypolicies <- function (f) {
   policyitems=tail(scan(trimws(f), what="", sep="\n"),-1)
   data=do.call("rbind",lapply(policyitems,read_policy))
-}
-
-reducer_stats <- function (data) {
-  rm=ddply(data,c("experiment","powercap"),run_metrics)
-  rm$lambdaloss =
-    ((1-lambda) * rm$runtime / max(rm$runtime)) +
-    (lambda* rm$watthours / max(rm$watthours))
-  rm
-}
-
-augmenter_stats <- function (data) {
-  am = ddply(data,c("experiment","powercap"),reduce_one_run_augment_data)
-  am$lambdaloss =
-    ((1-lambda) * am$runtime / max(am$runtime)) +
-    (lambda* am$watthours / max(am$watthours))
-  am
 }

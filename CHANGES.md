@@ -1,3 +1,10 @@
+v0.3 2018-03-14 Grenoble
+--------------------------
+
+* bugfix in exp3 reward ranges
+* added cli interface
+* added validation suite
+
 v0.2.3.2 2017-04-13 Grenoble
 --------------------------
 

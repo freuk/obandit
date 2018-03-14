@@ -65,8 +65,9 @@ in stdenv.mkDerivation {
     mkdir -p $out/html
     cp o/zymakefile/*.md $out/md
     cp o/zymakefile/*.html $out/html
-    cp -r figure $out/md
-    cp -r figure $out/html
+    cp -r figure $out
+    tar -cvzf source.tgz ${./.}/*
+    cp source.tgz $out/
   '';
 
   obanditversion=obandit.version;
