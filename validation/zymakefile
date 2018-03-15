@@ -6,7 +6,7 @@ isamples = $(range 1 30)
 policies = exp3 ucb1 expgreedy
 
 #repeats
-n = 30
+n = 3000
 
 rate = 0.1
 
