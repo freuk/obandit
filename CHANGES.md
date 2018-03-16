@@ -1,4 +1,4 @@
-v0.3 2018-03-14 Grenoble
+v0.3.1 2018-03-16 Grenoble
 --------------------------
 
 * experimental validation fixes on 0.3.
