@@ -1,16 +1,8 @@
-v0.3.3 2018-03-16 Grenoble
+v0.3.4 2018-03-16 Grenoble
 --------------------------
 
 * opam url updates
-
-v0.3.2 2018-03-16 Grenoble
---------------------------
-
 * experimental validation fixes on 0.3.
-
-v0.3 2018-03-14 Grenoble
---------------------------
-
 * bugfix in exp3 reward ranges
 * added cli interface
 * added validation suite
