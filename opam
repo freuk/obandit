@@ -1,8 +1,8 @@
 opam-version: "1.2"
 maintainer: "Valentin Reis <fre@freux.fr>"
 authors: ["Valentin Reis <fre@freux.fr>"]
-homepage: "https://freuk.github.io/obandit/"
-doc: "https://freuk.github.io/obandit/api.docdir"
+homepage: "http://freux.fr/oss/obandit.html"
+doc: "http://freux.fr/oss/obandit/documentation/index.html"
 license: "ISC"
 dev-repo: "https://github.com/freuk/obandit.git"
 bug-reports: "https://github.com/freuk/obandit/issues"
