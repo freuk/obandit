@@ -184,8 +184,8 @@ let unsupported = Ok 1
 let publish = function
 | "distrib" :: uri :: name :: version :: msg :: archive :: _ ->
     publish_distrib uri name version msg archive
-| "doc" :: uri :: name :: version :: msg :: docdir :: _ ->
-    publish_doc_gh_pages uri name version docdir
+| "doc" :: uri :: name :: version :: msg :: docdir :: _ -> Ok 0
+    (*publish_doc_gh_pages uri name version docdir*)
 | "alt" :: kind :: uri :: name :: version :: msg :: archive :: _ ->
     unsupported
 | args ->
