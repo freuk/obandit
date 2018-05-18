@@ -1,6 +1,6 @@
-#Obandit
+# Obandit
 
-##CLI Interface
+## CLI Interface
 
 Obandit-`r Sys.getenv('obanditversion')` ships with a helper binary.
 
