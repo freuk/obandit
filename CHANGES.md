@@ -1,4 +1,4 @@
-v0.3.4 2018-03-16 Grenoble
+v0.3.4 2019-03-04 Chicago
 --------------------------
 
 * opam url updates
