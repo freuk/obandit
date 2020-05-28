@@ -11,20 +11,11 @@ docker-run:
 docker-clean:
 	docker rm obandit
 
-nix:
-	nix-build -A obandit
-
-#.PHONY: build
-#build:
-	#topkg build
+.PHONY: pre-commit
+pre-commit: docs
 
 .PHONY: docs
 docs:
 	rm -rf docs
 	cp --no-preserve=mode -r $$(nix-build -A obandit)/share/doc docs
-	for i in docs/*.html ; do echo "$$i" && pandoc -s $$i -o $$i.md -t commonmark ; done
-	rm docs/*.html
-
-#.PHONY: docdeploy
-#docdeploy:
-	#rsync -r _build/doc/api.docdir/ web:/mnt/web/web/obandit/doc
+	cp doc/kroliki.jpg docs/kroliki.jpg
