@@ -18,9 +18,12 @@ nix:
 #build:
 	#topkg build
 
-#.PHONY: doc
-#doc:
-	#nix-shell --run "topkg doc --docflags='-g odoc_custom.cma'"
+.PHONY: docs
+docs:
+	rm -rf docs
+	cp --no-preserve=mode -r $$(nix-build -A obandit)/share/doc docs
+	for i in docs/*.html ; do echo "$$i" && pandoc -s $$i -o $$i.md -t commonmark ; done
+	rm docs/*.html
 
 #.PHONY: docdeploy
 #docdeploy:
