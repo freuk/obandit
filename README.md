@@ -1,19 +1,7 @@
 # Obandit
 
-[**opam**](https://opam.ocaml.org/packages/obandit/)  
+[**opam**](https://opam.ocaml.org/packages/obandit/) entry.
 
 Obandit is a multi-armed bandit OCaml module distributed under the ISC license.
-It supports the EXP, UCB and Epsilon-greedy family of algorithms.
-
-## Documentation
-
-See the generated Ocamldoc
-[**documentation**](https://freuk.github.io/obandit/Obandit.html). 
-
-## Installation
-
-Using opam:
-```
-opam install obandit
-```
-If you don't use opam consult the [opam](opam) file for build instructions.
+It supports the EXP, UCB and Epsilon-greedy family of algorithms. See the 
+generated [**documentation**](https://freuk.github.io/obandit/Obandit.html). 
