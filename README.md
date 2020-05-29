@@ -1,4 +1,4 @@
-##obandit
+## obandit
 
 obandit is a multi-armed bandit OCaml module distributed under the ISC license.
 It supports the EXP, UCB and Epsilon-greedy family of algorithms. 
